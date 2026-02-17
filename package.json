@@ -1,7 +1,7 @@
 {
-  "name": "template-extensions",
+  "name": "pirate.vodka-extensions",
   "private": true,
-  "description": "Paperback extensions designed as templates to help developers get started quickly. Maintained by Inkdex.",
+  "description": "Paperback extensions from pirate.vodka. Maintained by Lucifers Circle.",
   "type": "module",
   "scripts": {
     "lint": "oxlint --type-aware --fix",
@@ -25,5 +25,5 @@
     "oxlint-tsgolint": "^0.11.0",
     "typescript": "^5.9.3"
   },
-  "repositoryName": "Template Extensions (0.9)"
+  "repositoryName": "pirate.vodka extensions (0.9)"
 }
