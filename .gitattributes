@@ -2,3 +2,5 @@ src/** merge=ours
 .gitattributes merge=ours
 .github/workflows/bundle-deploy.yaml merge=ours
 package.json merge=ours
+tsconfig.json merge=ours
+package-lock.json merge=ours
