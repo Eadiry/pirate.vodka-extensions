@@ -1,1 +1,3 @@
 src/** merge=ours
+.gitattributes merge=ours
+.github/workflows/bundle-deploy.yaml merge=ours
