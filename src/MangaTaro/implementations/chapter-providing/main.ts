@@ -3,7 +3,11 @@ import { URL } from "@paperback/types";
 import { MANGATARO_DOMAIN } from "../../main";
 import { fetchJSON, fetchText } from "../../services/network";
 import { extractNumericId, generateToken } from "../shared/utils";
-import type { MangaTaroChaptersResponse, MangaTaroChapterContentResponse } from "../shared/models";
+import type {
+  MangaTaroChapter,
+  MangaTaroChaptersResponse,
+  MangaTaroChapterContentResponse,
+} from "../shared/models";
 import { parseChapterList } from "./parsers";
 
 export class ChapterProvider {
@@ -24,22 +28,33 @@ export class ChapterProvider {
       numericId = resolved;
     }
 
-    const { token, timestamp } = generateToken();
-    const url = new URL(MANGATARO_DOMAIN)
-      .addPathComponent("auth")
-      .addPathComponent("manga-chapters")
-      .setQueryItem("manga_id", numericId)
-      .setQueryItem("offset", "0")
-      .setQueryItem("limit", "500")
-      .setQueryItem("order", "DESC")
-      .setQueryItem("_t", token)
-      .setQueryItem("_ts", timestamp.toString())
-      .toString();
+    const LIMIT = 500;
+    const allChapters: MangaTaroChapter[] = [];
+    let offset = 0;
+    let hasMore = true;
 
-    const request: Request = { url, method: "GET" };
-    const json = await fetchJSON<MangaTaroChaptersResponse>(request);
+    while (hasMore) {
+      const { token, timestamp } = generateToken();
+      const url = new URL(MANGATARO_DOMAIN)
+        .addPathComponent("auth")
+        .addPathComponent("manga-chapters")
+        .setQueryItem("manga_id", numericId)
+        .setQueryItem("offset", String(offset))
+        .setQueryItem("limit", String(LIMIT))
+        .setQueryItem("order", "DESC")
+        .setQueryItem("_t", token)
+        .setQueryItem("_ts", timestamp.toString())
+        .toString();
 
-    return parseChapterList(json, sourceManga);
+      const request: Request = { url, method: "GET" };
+      const json = await fetchJSON<MangaTaroChaptersResponse>(request);
+      allChapters.push(...json.chapters);
+
+      hasMore = json.has_more;
+      offset += LIMIT;
+    }
+
+    return parseChapterList(allChapters, sourceManga);
   }
 
   async getChapterDetails(chapter: Chapter): Promise<ChapterDetails> {

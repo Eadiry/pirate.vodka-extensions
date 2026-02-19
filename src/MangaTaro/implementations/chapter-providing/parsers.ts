@@ -1,12 +1,12 @@
 import type { Chapter, SourceManga } from "@paperback/types";
-import type { MangaTaroChaptersResponse } from "../shared/models";
+import type { MangaTaroChapter } from "../shared/models";
 import { parseRelativeDate } from "../shared/utils";
 
 export function parseChapterList(
-  json: MangaTaroChaptersResponse,
+  chapters: MangaTaroChapter[],
   sourceManga: SourceManga,
 ): Chapter[] {
-  return json.chapters.map((ch) => {
+  return chapters.map((ch) => {
     const groupName = ch.group_name?.trim() || "No Group";
 
     // use empty string when title is N/A
