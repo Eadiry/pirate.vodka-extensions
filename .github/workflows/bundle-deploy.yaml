@@ -29,6 +29,13 @@ jobs:
         run: npm ci
       - name: Bundle Extensions
         run: npm run bundle
+      - name: Preserve dev directory from gh-pages
+        run: |
+          git fetch origin gh-pages
+          if git ls-tree -d origin/gh-pages dev &>/dev/null; then
+            git checkout origin/gh-pages -- dev
+            mv dev bundles/dev
+          fi
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4
         with:
