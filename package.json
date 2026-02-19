@@ -16,9 +16,13 @@
     "test": "npm run tsc && npm run lint:check && npm run format:check && npm run bundle",
     "prepare": "husky"
   },
+  "dependencies": {
+    "crypto-js": "^4.2.0"
+  },
   "devDependencies": {
     "@paperback/toolchain": "^1.0.0-alpha.57",
     "@paperback/types": "^1.0.0-alpha.57",
+    "@types/crypto-js": "^4.2.2",
     "husky": "^9.1.7",
     "oxfmt": "^0.25.0",
     "oxlint": "^1.40.0",
