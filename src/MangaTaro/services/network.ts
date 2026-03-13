@@ -4,8 +4,10 @@ import { MANGATARO_DOMAIN } from "../main";
 
 export class MangaTaroInterceptor extends PaperbackInterceptor {
   async interceptRequest(request: Request): Promise<Request> {
-    request.headers = request.headers ?? {};
-    request.headers.referer = `${MANGATARO_DOMAIN}/`;
+    request.headers = {
+      ...request.headers,
+      referer: `${MANGATARO_DOMAIN}/`,
+    };
     return request;
   }
 
@@ -19,6 +21,9 @@ export class MangaTaroInterceptor extends PaperbackInterceptor {
       throw new CloudflareError({
         url: request.url,
         method: request.method ?? "GET",
+        headers: {
+          "user-agent": await Application.getDefaultUserAgent(),
+        },
       });
     }
 

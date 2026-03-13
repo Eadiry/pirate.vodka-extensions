@@ -1,6 +1,6 @@
 import type { Request, Response } from "@paperback/types";
 import { CloudflareError, PaperbackInterceptor } from "@paperback/types";
-import { QTOON_DOMAIN, requestToken } from "../main";
+import { QTOON_DOMAIN, QTOON_API, requestToken } from "../main";
 import type { QToonEncryptedResponse } from "../implementations/shared/models";
 import { getLanguage } from "../implementations/settings-form/main";
 import { decryptResponse } from "../implementations/shared/utils";
@@ -10,7 +10,7 @@ export class QToonInterceptor extends PaperbackInterceptor {
     request.headers = {
       ...request.headers,
       referer: `${QTOON_DOMAIN}/`,
-      ...(request.url.includes("api.qtoon.com") && {
+      ...(request.url.includes(QTOON_API) && {
         platform: "h5",
         lth: getLanguage(),
         did: requestToken,
