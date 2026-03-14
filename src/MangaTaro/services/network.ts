@@ -1,12 +1,12 @@
 import type { Request, Response } from "@paperback/types";
 import { CloudflareError, PaperbackInterceptor } from "@paperback/types";
-import { MANGATARO_DOMAIN } from "../main";
+import { DOMAIN } from "../main";
 
 export class MangaTaroInterceptor extends PaperbackInterceptor {
   async interceptRequest(request: Request): Promise<Request> {
     request.headers = {
       ...request.headers,
-      referer: `${MANGATARO_DOMAIN}/`,
+      referer: `${DOMAIN}/`,
     };
     return request;
   }

@@ -1,6 +1,6 @@
 import type { Chapter, ChapterDetails, Request, SourceManga } from "@paperback/types";
 import { URL } from "@paperback/types";
-import { MANGATARO_DOMAIN } from "../../main";
+import { DOMAIN } from "../../main";
 import { fetchJSON, fetchText } from "../../services/network";
 import { extractNumericId, generateToken, parseMangaId } from "../shared/utils";
 import type {
@@ -17,7 +17,7 @@ export class ChapterProvider {
 
     // slug-only mangaIds (from wp-json discover sections) have no numeric id. resolve by fetching the manga page
     if (!numericId || !/^\d+$/.test(numericId)) {
-      const pageUrl = new URL(MANGATARO_DOMAIN)
+      const pageUrl = new URL(DOMAIN)
         .addPathComponent("manga")
         .addPathComponent(slug)
         .toString();
@@ -34,7 +34,7 @@ export class ChapterProvider {
 
     while (hasMore) {
       const { token, timestamp } = generateToken();
-      const url = new URL(MANGATARO_DOMAIN)
+      const url = new URL(DOMAIN)
         .addPathComponent("auth")
         .addPathComponent("manga-chapters")
         .setQueryItem("manga_id", numericId)
@@ -59,7 +59,7 @@ export class ChapterProvider {
   async getChapterDetails(chapter: Chapter): Promise<ChapterDetails> {
     const chapterId = chapter.chapterId;
 
-    const url = new URL(MANGATARO_DOMAIN)
+    const url = new URL(DOMAIN)
       .addPathComponent("auth")
       .addPathComponent("chapter-content")
       .setQueryItem("chapter_id", chapterId)

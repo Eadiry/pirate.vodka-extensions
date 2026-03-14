@@ -7,7 +7,7 @@ import type {
   SortingOption,
 } from "@paperback/types";
 import { ContentRating, URL } from "@paperback/types";
-import { MANGATARO_DOMAIN } from "../../main";
+import { DOMAIN } from "../../main";
 import { fetchJSON } from "../../services/network";
 import type { MangaTaroLoadItem, MangaTaroLoadRequest } from "../shared/models";
 import { formatMangaId, isNovel, slugFromUrl } from "../shared/utils";
@@ -49,7 +49,7 @@ export class SearchProvider {
     const genreMatchMode = readDropdownFilter(filters, "genreMatchMode", "any");
     const sort = sortingOption?.id ?? "post_desc";
 
-    const url = new URL(MANGATARO_DOMAIN)
+    const url = new URL(DOMAIN)
       .addPathComponent("wp-json")
       .addPathComponent("manga")
       .addPathComponent("v1")

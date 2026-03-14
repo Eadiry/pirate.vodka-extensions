@@ -1,6 +1,6 @@
 import type { Request, SearchFilter, SortingOption } from "@paperback/types";
 import { URL } from "@paperback/types";
-import { MANGATARO_DOMAIN } from "../../main";
+import { DOMAIN } from "../../main";
 import { fetchJSON } from "../../services/network";
 import type { WPTag } from "../shared/models";
 
@@ -25,7 +25,7 @@ export const SORT_OPTIONS: SortingOption[] = [
 ];
 
 async function fetchAllTags(): Promise<WPTag[]> {
-  const url = new URL(MANGATARO_DOMAIN)
+  const url = new URL(DOMAIN)
     .addPathComponent("wp-json")
     .addPathComponent("wp")
     .addPathComponent("v2")
