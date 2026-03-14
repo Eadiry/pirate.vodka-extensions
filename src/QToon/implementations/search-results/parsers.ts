@@ -1,12 +1,7 @@
 import type { SearchFilter, SearchResultItem, SortingOption } from "@paperback/types";
 import { ContentRating } from "@paperback/types";
-import type { QToonComic } from "../shared/models";
+import type { FilterEntry, QToonComic } from "../shared/models";
 import { comicId } from "../shared/utils";
-
-export interface FilterEntry {
-  id: string;
-  value: string | Record<string, "included" | "excluded">;
-}
 
 export function readDropdownFilter(
   filters: FilterEntry[],

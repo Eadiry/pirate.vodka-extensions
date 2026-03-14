@@ -1,12 +1,7 @@
 import type { DiscoverSection, SimpleCarouselItem } from "@paperback/types";
 import { ContentRating, DiscoverSectionType } from "@paperback/types";
-import type { QToonComic, QToonCompositionBlock } from "../shared/models";
+import type { QToonComic, QToonCompositionBlock, SectionEndpoint } from "../shared/models";
 import { comicId } from "../shared/utils";
-
-export interface SectionEndpoint {
-  type: "ranking" | "album";
-  id: string; // rsid or asid
-}
 
 export function extractEndpoint(block: QToonCompositionBlock): SectionEndpoint | undefined {
   if (block.ranking?.rsid) return { type: "ranking", id: block.ranking.rsid };

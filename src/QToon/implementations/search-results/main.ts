@@ -9,18 +9,13 @@ import type {
 import { URL } from "@paperback/types";
 import { QTOON_API } from "../../main";
 import { fetchEncryptedJSON } from "../../services/network";
-import type { QToonComicsList } from "../shared/models";
+import type { FilterEntry, QToonComicsList, SearchMetadata } from "../shared/models";
 import {
   buildSearchFilters,
-  type FilterEntry,
   parseQToonSearchResults,
   readDropdownFilter,
   SORT_OPTIONS,
 } from "./parsers";
-
-interface SearchMetadata {
-  page: number;
-}
 
 export class SearchProvider {
   async getSearchFilters(): Promise<SearchFilter[]> {

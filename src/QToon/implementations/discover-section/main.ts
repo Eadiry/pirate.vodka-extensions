@@ -3,6 +3,7 @@ import { URL } from "@paperback/types";
 import { QTOON_API } from "../../main";
 import { fetchEncryptedJSON } from "../../services/network";
 import type {
+  DiscoverMetadata,
   QToonComicsList,
   QToonCompositionBlock,
   QToonCompositionPage,
@@ -10,12 +11,6 @@ import type {
 import { extractEndpoint, parseCompositionBlocks, parseQToonComics } from "./parsers";
 
 const HOMEPAGE_PSID = "ps_ErZj1GjyOOOaAVI1gdDj";
-
-interface DiscoverMetadata {
-  page: number;
-  endpointType: "ranking" | "album";
-  endpointId: string;
-}
 
 function buildCompositionUrl(page: number): string {
   return new URL(QTOON_API)
