@@ -4,11 +4,14 @@ import { DOMAIN } from "../main";
 
 export class MangaTaroInterceptor extends PaperbackInterceptor {
   async interceptRequest(request: Request): Promise<Request> {
-    request.headers = {
-      ...request.headers,
-      referer: `${DOMAIN}/`,
+    return {
+      ...request,
+      headers: {
+        ...request.headers,
+        referer: `${DOMAIN}/`,
+        "user-agent": await Application.getDefaultUserAgent(),
+      },
     };
-    return request;
   }
 
   override async interceptResponse(

@@ -17,10 +17,7 @@ export class ChapterProvider {
 
     // slug-only mangaIds (from wp-json discover sections) have no numeric id. resolve by fetching the manga page
     if (!numericId || !/^\d+$/.test(numericId)) {
-      const pageUrl = new URL(DOMAIN)
-        .addPathComponent("manga")
-        .addPathComponent(slug)
-        .toString();
+      const pageUrl = new URL(DOMAIN).addPathComponent("manga").addPathComponent(slug).toString();
       const html = await fetchText({ url: pageUrl, method: "GET" } as Request);
       const resolved = extractNumericId(html);
       if (!resolved) throw new Error(`Could not resolve numeric ID for manga: ${slug}`);

@@ -9,10 +9,7 @@ export class MangaProvider {
   async getMangaDetails(mangaId: string): Promise<SourceManga> {
     const slug = parseMangaId(mangaId).slug;
 
-    const url = new URL(DOMAIN)
-      .addPathComponent("manga")
-      .addPathComponent(slug)
-      .toString();
+    const url = new URL(DOMAIN).addPathComponent("manga").addPathComponent(slug).toString();
 
     const request: Request = { url, method: "GET" };
     const html = await fetchText(request);
