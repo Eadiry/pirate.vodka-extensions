@@ -1,6 +1,6 @@
 import type { DiscoverSection, DiscoverSectionItem, PagedResults, Request } from "@paperback/types";
 import { URL } from "@paperback/types";
-import { QTOON_API } from "../../main";
+import { DOMAIN_API } from "../../main";
 import { fetchEncryptedJSON } from "../../services/network";
 import type {
   DiscoverMetadata,
@@ -13,7 +13,7 @@ import { extractEndpoint, parseCompositionBlocks, parseQToonComics } from "./par
 const HOMEPAGE_PSID = "ps_ErZj1GjyOOOaAVI1gdDj";
 
 function buildCompositionUrl(page: number): string {
-  return new URL(QTOON_API)
+  return new URL(DOMAIN_API)
     .addPathComponent("api")
     .addPathComponent("w")
     .addPathComponent("navigation")
@@ -28,7 +28,7 @@ function buildCompositionUrl(page: number): string {
 
 function buildPaginatedUrl(type: "ranking" | "album", id: string, page: number): string {
   if (type === "album") {
-    return new URL(QTOON_API)
+    return new URL(DOMAIN_API)
       .addPathComponent("api")
       .addPathComponent("w")
       .addPathComponent("album")
@@ -38,7 +38,7 @@ function buildPaginatedUrl(type: "ranking" | "album", id: string, page: number):
       .setQueryItem("asid", id)
       .toString();
   }
-  return new URL(QTOON_API)
+  return new URL(DOMAIN_API)
     .addPathComponent("api")
     .addPathComponent("w")
     .addPathComponent("ranking")

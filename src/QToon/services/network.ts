@@ -1,6 +1,6 @@
 import type { Request, Response } from "@paperback/types";
 import { CloudflareError, PaperbackInterceptor } from "@paperback/types";
-import { QTOON_DOMAIN, QTOON_API, requestToken } from "../main";
+import { DOMAIN, DOMAIN_API, requestToken } from "../main";
 import type { QToonEncryptedResponse } from "../implementations/shared/models";
 import { getLanguage } from "../implementations/settings-form/main";
 import { decryptResponse } from "../implementations/shared/utils";
@@ -11,9 +11,9 @@ export class QToonInterceptor extends PaperbackInterceptor {
       ...request,
       headers: {
         ...request.headers,
-        referer: `${QTOON_DOMAIN}/`,
+        referer: `${DOMAIN}/`,
         "user-agent": await Application.getDefaultUserAgent(),
-        ...(request.url.includes(QTOON_API) && {
+        ...(request.url.includes(DOMAIN_API) && {
           platform: "h5",
           lth: getLanguage(),
           did: requestToken,

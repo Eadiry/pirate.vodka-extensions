@@ -7,7 +7,7 @@ import type {
   SortingOption,
 } from "@paperback/types";
 import { URL } from "@paperback/types";
-import { QTOON_API } from "../../main";
+import { DOMAIN_API } from "../../main";
 import { fetchEncryptedJSON } from "../../services/network";
 import type { FilterEntry, QToonComicsList, SearchMetadata } from "../shared/models";
 import {
@@ -38,7 +38,7 @@ export class SearchProvider {
     const status = readDropdownFilter(filters, "serialStatus", "-1");
     const sortType = sortingOption?.id ?? "hot";
 
-    const base = new URL(QTOON_API)
+    const base = new URL(DOMAIN_API)
       .addPathComponent("api")
       .addPathComponent("w")
       .addPathComponent("search")
