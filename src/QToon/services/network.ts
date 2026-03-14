@@ -7,17 +7,19 @@ import { decryptResponse } from "../implementations/shared/utils";
 
 export class QToonInterceptor extends PaperbackInterceptor {
   async interceptRequest(request: Request): Promise<Request> {
-    request.headers = {
-      ...request.headers,
-      referer: `${QTOON_DOMAIN}/`,
-      ...(request.url.includes(QTOON_API) && {
-        platform: "h5",
-        lth: getLanguage(),
-        did: requestToken,
-      }),
+    return {
+      ...request,
+      headers: {
+        ...request.headers,
+        referer: `${QTOON_DOMAIN}/`,
+        "user-agent": await Application.getDefaultUserAgent(),
+        ...(request.url.includes(QTOON_API) && {
+          platform: "h5",
+          lth: getLanguage(),
+          did: requestToken,
+        }),
+      },
     };
-
-    return request;
   }
 
   override async interceptResponse(
