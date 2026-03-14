@@ -1,6 +1,7 @@
 import type { SearchFilter, SearchResultItem, SortingOption } from "@paperback/types";
 import { ContentRating } from "@paperback/types";
 import type { QToonComic } from "../shared/models";
+import { comicId } from "../shared/utils";
 
 export interface FilterEntry {
   id: string;
@@ -20,9 +21,9 @@ export function readDropdownFilter(
 
 export function parseQToonSearchResults(comics: QToonComic[]): SearchResultItem[] {
   return comics
-    .filter((comic) => comic.csid || comic.webLinkId)
+    .filter((comic) => comicId(comic))
     .map((comic) => ({
-      mangaId: comic.webLinkId || comic.csid,
+      mangaId: comicId(comic),
       title: comic.title ?? "",
       subtitle: comic.author ?? "",
       imageUrl: comic.image.thumb.url,

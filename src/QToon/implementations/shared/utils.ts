@@ -1,4 +1,10 @@
 import CryptoJS from "crypto-js";
+import type { QToonComic } from "./models";
+
+// resolves the preferred public ID for a comic (webLinkId over csid)
+export function comicId(comic: QToonComic): string {
+  return comic.webLinkId || comic.csid;
+}
 
 export function applyMixins(derivedCtor: any, constructors: any[]) {
   constructors.forEach((baseCtor) => {
