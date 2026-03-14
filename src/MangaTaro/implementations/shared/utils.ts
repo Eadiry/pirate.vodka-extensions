@@ -26,6 +26,24 @@ export function generateToken(): { token: string; timestamp: number } {
   return { token: hash, timestamp };
 }
 
+export function isNovel(type: string): boolean {
+  return type.toLowerCase() === "novel";
+}
+
+export function slugFromUrl(url: string): string {
+  return url.split("/").filter(Boolean).pop() ?? url;
+}
+
+export function parseMangaId(mangaId: string): { slug: string; numericId?: string } {
+  const idx = mangaId.indexOf(":");
+  if (idx === -1) return { slug: mangaId };
+  return { slug: mangaId.substring(0, idx), numericId: mangaId.substring(idx + 1) };
+}
+
+export function formatMangaId(slug: string, numericId?: string | number): string {
+  return numericId != null ? `${slug}:${numericId}` : slug;
+}
+
 export function parseRelativeDate(str: string): Date {
   const now = new Date();
   const s = str.trim().toLowerCase();

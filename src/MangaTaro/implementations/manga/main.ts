@@ -2,11 +2,12 @@ import type { Request, SourceManga } from "@paperback/types";
 import { URL } from "@paperback/types";
 import { MANGATARO_DOMAIN } from "../../main";
 import { fetchText } from "../../services/network";
+import { parseMangaId } from "../shared/utils";
 import { parseMangaDetails } from "./parsers";
 
 export class MangaProvider {
   async getMangaDetails(mangaId: string): Promise<SourceManga> {
-    const slug = mangaId.split(":")[0] ?? mangaId;
+    const slug = parseMangaId(mangaId).slug;
 
     const url = new URL(MANGATARO_DOMAIN)
       .addPathComponent("manga")

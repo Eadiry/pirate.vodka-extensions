@@ -2,7 +2,7 @@ import type { Chapter, ChapterDetails, Request, SourceManga } from "@paperback/t
 import { URL } from "@paperback/types";
 import { MANGATARO_DOMAIN } from "../../main";
 import { fetchJSON, fetchText } from "../../services/network";
-import { extractNumericId, generateToken } from "../shared/utils";
+import { extractNumericId, generateToken, parseMangaId } from "../shared/utils";
 import type {
   MangaTaroChapter,
   MangaTaroChaptersResponse,
@@ -12,9 +12,8 @@ import { parseChapterList } from "./parsers";
 
 export class ChapterProvider {
   async getChapters(sourceManga: SourceManga): Promise<Chapter[]> {
-    const parts = sourceManga.mangaId.split(":");
-    const slug = parts[0] ?? sourceManga.mangaId;
-    let numericId = parts[1];
+    const { slug, numericId: resolvedId } = parseMangaId(sourceManga.mangaId);
+    let numericId = resolvedId;
 
     // slug-only mangaIds (from wp-json discover sections) have no numeric id. resolve by fetching the manga page
     if (!numericId || !/^\d+$/.test(numericId)) {
