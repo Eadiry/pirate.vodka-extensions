@@ -16,6 +16,7 @@ export function extractNumericId(html: string): string | undefined {
   return html.match(/data-manga-id="(\d+)"/)?.[1];
 }
 
+// reverse-engineered API auth token. source is in the autoptimize bundle on manga detail pages (search for the secret or generateToken, its not obfuscated)
 export function generateToken(): { token: string; timestamp: number } {
   const timestamp = Math.floor(Date.now() / 1000);
   const hour = new Date().toISOString().slice(0, 13).replace(/[-T:]/g, "");
@@ -34,6 +35,7 @@ export function slugFromUrl(url: string): string {
   return url.split("/").filter(Boolean).pop() ?? url;
 }
 
+// format is "slug:numericId". slug from URLs, numericId from the sites DB. discover sections only provide slug
 export function parseMangaId(mangaId: string): { slug: string; numericId?: string } {
   const idx = mangaId.indexOf(":");
   if (idx === -1) return { slug: mangaId };

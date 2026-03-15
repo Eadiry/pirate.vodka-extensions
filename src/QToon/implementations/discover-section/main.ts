@@ -10,6 +10,7 @@ import type {
 } from "../shared/models";
 import { extractEndpoint, parseCompositionBlocks, parseQToonComics } from "./parsers";
 
+// fixed homepage composition ID from QToons API
 const HOMEPAGE_PSID = "ps_ErZj1GjyOOOaAVI1gdDj";
 
 function buildCompositionUrl(page: number): string {

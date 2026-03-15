@@ -52,7 +52,7 @@ export class SearchProvider {
           .toString()
       : base
           .addPathComponent("gallery")
-          .setQueryItem("area", "-1")
+          .setQueryItem("area", "-1") // -1 = unfiltered
           .setQueryItem("tag", tag)
           .setQueryItem("gender", "-1")
           .setQueryItem("serialStatus", status)

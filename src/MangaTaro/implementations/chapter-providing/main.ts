@@ -24,7 +24,7 @@ export class ChapterProvider {
       numericId = resolved;
     }
 
-    const LIMIT = 500;
+    const LIMIT = 500; // API max per request
     const allChapters: MangaTaroChapter[] = [];
     let offset = 0;
     let hasMore = true;

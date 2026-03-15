@@ -45,7 +45,7 @@ function aesDecrypt(data: string, key: string, iv: string): string {
 
 export function decryptResponse(data: string, ts: number, did: string): string {
   const inner = md5(`${did}${ts}`);
-  const outer = md5(`${inner}OQlM9JBJgLWsgffb`);
+  const outer = md5(`${inner}OQlM9JBJgLWsgffb`); // API response decryption salt
   const key = outer.substring(0, 16);
   const iv = outer.substring(16, 32);
   return aesDecrypt(data, key, iv);
@@ -53,7 +53,7 @@ export function decryptResponse(data: string, ts: number, did: string): string {
 
 export function decryptImageUrl(url: string, did: string): string {
   const inner = md5(did);
-  const outer = md5(`${inner}9tv86uBwmOYs7QZ0`);
+  const outer = md5(`${inner}9tv86uBwmOYs7QZ0`); // image URL decryption salt
   const key = outer.substring(0, 16);
   const iv = outer.substring(16, 32);
   return aesDecrypt(url, key, iv);

@@ -11,6 +11,7 @@ const STATUSES = ["Ongoing", "Completed", "Hiatus", "Cancelled"];
 const CURRENT_YEAR = new Date().getFullYear();
 const YEARS: string[] = [];
 for (let y = CURRENT_YEAR; y >= 1946; y--) {
+  // earliest year the site's filter supports
   YEARS.push(String(y));
 }
 
