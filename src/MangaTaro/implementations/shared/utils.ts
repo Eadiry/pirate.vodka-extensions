@@ -1,5 +1,3 @@
-import CryptoJS from "crypto-js";
-
 export function applyMixins(derivedCtor: any, constructors: any[]) {
   constructors.forEach((baseCtor) => {
     Object.getOwnPropertyNames(baseCtor.prototype).forEach((name) => {
@@ -21,9 +19,10 @@ export function generateToken(): { token: string; timestamp: number } {
   const timestamp = Math.floor(Date.now() / 1000);
   const hour = new Date().toISOString().slice(0, 13).replace(/[-T:]/g, "");
   const secret = "mng_ch_" + hour;
-  const hash = CryptoJS.MD5(timestamp.toString() + secret)
-    .toString()
-    .substring(0, 16);
+  const encoder = new TextEncoder();
+  const array = encoder.encode(timestamp.toString() + secret);
+  // @ts-expect-error (remove this once method is in types)
+  const hash = Application.crypto_md5Hash(array.buffer).substring(0, 16);
   return { token: hash, timestamp };
 }
 
