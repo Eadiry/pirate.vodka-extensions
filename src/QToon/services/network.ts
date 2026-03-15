@@ -64,7 +64,7 @@ export async function fetchEncryptedJSON<T>(request: Request): Promise<T> {
     throw new Error(`QToon API error code ${envelope.code}: ${request.url}`);
   }
 
-  const decrypted = decryptResponse(envelope.data, envelope.ts, requestToken);
+  const decrypted = await decryptResponse(envelope.data, envelope.ts, requestToken);
 
   try {
     return JSON.parse(decrypted) as T;

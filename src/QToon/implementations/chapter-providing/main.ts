@@ -64,7 +64,7 @@ export class ChapterProvider {
 
       for (const resource of resourceData.resources ?? []) {
         allPages.push({
-          url: decryptImageUrl(resource.url, requestToken),
+          url: await decryptImageUrl(resource.url, requestToken),
           idx: resource.rgIdx,
         });
       }
