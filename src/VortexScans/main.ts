@@ -25,11 +25,10 @@ export class VortexScansExtension implements Omit<Extension, keyof MangaProvidin
   );
 
   async initialise(): Promise<void> {
-    this.globalRateLimiter.registerInterceptor();
     this.cookieStorageInterceptor.registerInterceptor();
     this.vortexInterceptor.registerInterceptor();
-
     Application.setRedirectHandler(Application.Selector(this.vortexInterceptor, "handleRedirect"));
+    this.globalRateLimiter.registerInterceptor();
   }
 
   async saveCloudflareBypassCookies(cookies: Cookie[]): Promise<void> {

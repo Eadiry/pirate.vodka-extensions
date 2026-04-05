@@ -72,10 +72,12 @@ export class VortexScansInterceptor extends PaperbackInterceptor {
 
     const value = rest.join("=");
 
+    const cookieDomain = DOMAIN.replace("https://", "").replace("http://", "").split("/")[0];
+
     this.cookieStorage.setCookie({
       name,
       value,
-      domain: new globalThis.URL(DOMAIN).hostname,
+      domain: cookieDomain,
       path: "/",
     });
 

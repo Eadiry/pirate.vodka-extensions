@@ -6,7 +6,9 @@ import type { VortexPost } from "../shared/models";
 export function parseMangaDetails(post: VortexPost): SourceManga {
   const mangaId = post.id.toString();
 
-  const synopsis = Application.decodeHTMLEntities(post.postContent.replace(/<[^>]+>/g, ""));
+  const synopsis = Application.decodeHTMLEntities(
+    (post.postContent ?? "").replace(/<[^>]+>/g, ""),
+  );
   const secondaryTitles = post.alternativeTitles
     ? post.alternativeTitles
         .split(/[,\n]/)
