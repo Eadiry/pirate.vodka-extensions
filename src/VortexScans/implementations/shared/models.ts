@@ -10,7 +10,7 @@ export interface VortexPost {
   id: number;
   slug: string;
   postTitle: string;
-  postContent: string;
+  postContent?: string;
   alternativeTitles: string;
   featuredImage: string;
   featuredImageCL: string;
