@@ -1,34 +1,41 @@
 import type { Request, SourceManga } from "@paperback/types";
 import { URL } from "@paperback/types";
-import { DOMAIN, DOMAIN_API, PAGE_SIZE } from "../shared/models";
+import { DOMAIN_API, PAGE_SIZE } from "../shared/models";
 import type { VortexPost, VortexQueryResponse } from "../shared/models";
-import { fetchJSON, fetchText } from "../../services/network";
-import { extractPostContentFromSeriesHtml, parseMangaDetails } from "./parsers";
+import { parseMangaId } from "../shared/utils";
+import { fetchJSON } from "../../services/network";
+import { parseMangaDetails } from "./parsers";
 
-function buildPostsUrl(page: number): string {
+function buildQueryUrl(searchTerm: string): string {
   return new URL(DOMAIN_API)
-    .addPathComponent("posts")
-    .setQueryItem("page", page.toString())
+    .addPathComponent("query")
     .setQueryItem("perPage", PAGE_SIZE.toString())
-    .setQueryItem("searchTerm", "")
-    .setQueryItem("isNovel", "false")
-    .setQueryItem("tag", "hot")
+    .setQueryItem("page", "1")
+    .setQueryItem("orderBy", "lastChapterAddedAt")
+    .setQueryItem("orderDirection", "desc")
+    .setQueryItem("searchTerm", searchTerm)
     .toString();
 }
 
-async function scanPostsForManga(mangaId: string): Promise<VortexPost | undefined> {
-  for (let page = 1; page <= 10; page++) {
-    const request: Request = { url: buildPostsUrl(page), method: "GET" };
-    const data = await fetchJSON<VortexQueryResponse>(request);
-    const posts = data.posts ?? [];
+function slugToSearchTerm(slug: string): string {
+  return slug.trim().replace(/-/g, " ").replace(/\s+/g, " ");
+}
 
-    const matched = posts.find((post) => post.id.toString() === mangaId);
+async function queryMangaDetails(mangaId: string, slug: string): Promise<VortexPost | undefined> {
+  const searchTerm = slugToSearchTerm(slug);
+  const attempts = [searchTerm];
+
+  if (searchTerm.includes("'")) {
+    attempts.push(searchTerm.replace(/'/g, "\u2019"));
+  }
+
+  for (const term of attempts) {
+    const request: Request = { url: buildQueryUrl(term), method: "GET" };
+    const data = await fetchJSON<VortexQueryResponse>(request);
+    const matched = data.posts?.find((post) => post.id.toString() === mangaId);
+
     if (matched) {
       return matched;
-    }
-
-    if (posts.length < PAGE_SIZE) {
-      break;
     }
   }
 
@@ -37,32 +44,22 @@ async function scanPostsForManga(mangaId: string): Promise<VortexPost | undefine
 
 export class MangaProvider {
   async getMangaDetails(mangaId: string): Promise<SourceManga> {
-    const scanned = await scanPostsForManga(mangaId);
-    if (scanned) {
-      const seriesUrl = new URL(DOMAIN)
-        .addPathComponent("series")
-        .addPathComponent(scanned.slug)
-        .toString();
+    const parsed = parseMangaId(mangaId);
+    const slug = parsed.slug;
 
-      let enrichedPost = scanned;
-
-      try {
-        const html = await fetchText({ url: seriesUrl, method: "GET" });
-        const postContent = extractPostContentFromSeriesHtml(html, scanned.slug);
-
-        if (postContent) {
-          enrichedPost = {
-            ...scanned,
-            postContent,
-          };
-        }
-      } catch {
-        // fall back to the API post if the series page request or parse fails
-      }
-
-      return parseMangaDetails(enrichedPost);
+    if (!slug) {
+      throw new Error(`Missing slug in mangaId: ${mangaId}`);
     }
 
-    throw new Error(`Could not find manga with id: ${mangaId}`);
+    try {
+      const queried = await queryMangaDetails(parsed.id, slug);
+      if (queried) {
+        return parseMangaDetails(queried);
+      }
+    } catch {
+      // fall through to the final not-found error
+    }
+
+    throw new Error(`Could not fetch manga details for id: ${parsed.id}`);
   }
 }

@@ -1,5 +1,6 @@
 import type { DiscoverSectionItem } from "@paperback/types";
 import type { VortexQueryResponse } from "../shared/models";
+import { buildMangaId } from "../shared/utils";
 
 export function parseDiscoverItems(data: VortexQueryResponse): DiscoverSectionItem[] {
   const posts = data.posts ?? [];
@@ -7,7 +8,7 @@ export function parseDiscoverItems(data: VortexQueryResponse): DiscoverSectionIt
   return posts
     .filter((post) => post.postTitle && post.postTitle.trim().length > 0)
     .map((post) => {
-      const mangaId = post.id.toString();
+      const mangaId = buildMangaId(post.id, post.slug);
       const latestChapter = post.chapters?.[0];
 
       return {

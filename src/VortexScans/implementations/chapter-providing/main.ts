@@ -1,14 +1,14 @@
 import type { Chapter, ChapterDetails, Request, SourceManga } from "@paperback/types";
 import { URL } from "@paperback/types";
 import { DOMAIN, DOMAIN_API } from "../shared/models";
-import { MangaProvider } from "../manga/main";
 import type { VortexChaptersResponse } from "../shared/models";
+import { parseMangaId } from "../shared/utils";
 import { fetchJSON, fetchText } from "../../services/network";
 import { parseChapterDetails, parseChapterList } from "./parsers";
 
 export class ChapterProvider {
   async getChapters(sourceManga: SourceManga): Promise<Chapter[]> {
-    const postId = sourceManga.mangaId;
+    const { id: postId } = parseMangaId(sourceManga.mangaId);
 
     const url = new URL(DOMAIN_API)
       .addPathComponent("chapters")
@@ -32,12 +32,8 @@ export class ChapterProvider {
       throw new Error("This chapter is locked (premium/coins required).");
     }
 
-    let slug = sourceManga.mangaInfo?.additionalInfo?.slug;
-    if (!slug) {
-      const mangaProvider = new MangaProvider();
-      const updated = await mangaProvider.getMangaDetails(sourceManga.mangaId);
-      slug = updated.mangaInfo?.additionalInfo?.slug;
-    }
+    const slug =
+      sourceManga.mangaInfo?.additionalInfo?.slug ?? parseMangaId(sourceManga.mangaId).slug;
 
     if (!slug) {
       throw new Error(`Missing slug for manga ${sourceManga.mangaId}`);

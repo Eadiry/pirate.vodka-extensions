@@ -57,7 +57,11 @@ export async function fetchCheerio(request: Request): Promise<cheerio.CheerioAPI
   });
 }
 
-export function createChapterPageUrls(mangaId: string, chapterId: string, pages: string[]): string[] {
+export function createChapterPageUrls(
+  mangaId: string,
+  chapterId: string,
+  pages: string[],
+): string[] {
   const chapterKey = hashString(`${mangaId}:${chapterId}`);
   chapterPageCache.set(chapterKey, pages);
   Application.setState(JSON.stringify(pages), getChapterPageStateKey(chapterKey));
