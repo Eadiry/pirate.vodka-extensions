@@ -27,6 +27,10 @@ jobs:
           cache: npm
       - name: Install Dependencies
         run: npm ci
+      - name: Clean Previous Bundle Output
+        run: |
+          rm -rf bundles
+          rm -rf node_modules/.cache
       - name: Bundle Extensions
         run: npm run bundle
       - name: Preserve dev directory from gh-pages
