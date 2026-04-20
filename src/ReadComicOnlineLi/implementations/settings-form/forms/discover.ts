@@ -2,8 +2,10 @@ import {
   EditSection,
   Form,
   LabelRow,
+  Section,
   type FormItemElement,
   type FormSectionElement,
+  type SelectorID,
 } from "@paperback/types";
 import { getDiscoverSectionDefinition } from "../../shared/utils";
 import {
@@ -14,9 +16,13 @@ import {
 } from "./main";
 
 export class DiscoverSettingsForm extends Form {
+  private hiddenSectionRowSelectHandlers: Record<string, { handleSelect: () => Promise<void> }> =
+    {};
+
   override getSections(): FormSectionElement<unknown>[] {
     const visibleSectionIds = this.getVisibleSectionIds();
     const hiddenSectionIds = this.getHiddenSectionIds();
+    this.hiddenSectionRowSelectHandlers = {};
 
     return [
       EditSection("visible-discover-sections", {
@@ -33,14 +39,14 @@ export class DiscoverSettingsForm extends Form {
           "handleVisibleSectionReorder",
         ),
       }),
-      EditSection("hidden-discover-sections", {
-        id: "hidden-discover-sections",
-        header: hiddenSectionIds.length > 0 ? "Hidden" : "",
-        footer: hiddenSectionIds.length > 0 ? "Delete a row to restore it." : "",
-        items: hiddenSectionIds.map((sectionId) => this.sectionRow(sectionId)),
-        onDeletion: Application.Selector(this as DiscoverSettingsForm, "handleHiddenSectionDelete"),
-        onReorder: Application.Selector(this as DiscoverSettingsForm, "handleHiddenSectionReorder"),
-      }),
+      Section(
+        {
+          id: "hidden-discover-sections",
+          header: hiddenSectionIds.length > 0 ? "Hidden" : "",
+          footer: hiddenSectionIds.length > 0 ? "Tap a row to restore it." : "",
+        },
+        hiddenSectionIds.map((sectionId) => this.hiddenSectionRow(sectionId)),
+      ),
     ];
   }
 
@@ -56,12 +62,28 @@ export class DiscoverSettingsForm extends Form {
     return getDiscoverSectionOrder().filter((sectionId) => hiddenSections.includes(sectionId));
   }
 
-  private sectionRow(sectionId: string): FormItemElement<unknown> {
+  private sectionRow(
+    sectionId: string,
+    onSelect?: SelectorID<() => Promise<void>>,
+  ): FormItemElement<unknown> {
     const section = getDiscoverSectionDefinition(sectionId);
 
     return LabelRow(`discover-section-${sectionId}`, {
       title: section?.title ?? sectionId,
+      onSelect,
     });
+  }
+
+  private hiddenSectionRow(sectionId: string): FormItemElement<unknown> {
+    const handler = {
+      handleSelect: async (): Promise<void> => {
+        await this.restoreHiddenSection(sectionId);
+      },
+    };
+
+    this.hiddenSectionRowSelectHandlers[sectionId] = handler;
+
+    return this.sectionRow(sectionId, Application.Selector(handler, "handleSelect"));
   }
 
   private saveSectionLists(visibleSections: string[], hiddenSections: string[]): void {
@@ -152,30 +174,13 @@ export class DiscoverSettingsForm extends Form {
     this.saveSectionLists(visibleSections, [...this.getHiddenSectionIds(), deletedSectionId]);
   }
 
-  async handleHiddenSectionReorder(...args: unknown[]): Promise<void> {
-    const [sourceIndex, destinationIndex] = this.getCallbackIndexes(args);
-    if (sourceIndex === undefined || destinationIndex === undefined) {
-      return;
-    }
-
-    const sectionId = this.getSectionIdFromCallbackArgs(args);
-
-    this.saveSectionLists(
-      this.getVisibleSectionIds(),
-      this.moveSection(this.getHiddenSectionIds(), sourceIndex, destinationIndex, sectionId),
-    );
-  }
-
-  async handleHiddenSectionDelete(...args: unknown[]): Promise<void> {
+  async restoreHiddenSection(sectionId: string): Promise<void> {
     const hiddenSections = this.getHiddenSectionIds();
-    const [index = -1] = this.getCallbackIndexes(args);
-    const sectionId = this.getSectionIdFromCallbackArgs(args);
-    const restoredSectionId = sectionId ?? hiddenSections[index];
-    if (!restoredSectionId) {
+    if (!hiddenSections.includes(sectionId)) {
       return;
     }
 
-    this.removeSection(hiddenSections, index, restoredSectionId);
-    this.saveSectionLists([...this.getVisibleSectionIds(), restoredSectionId], hiddenSections);
+    this.removeSection(hiddenSections, hiddenSections.indexOf(sectionId), sectionId);
+    this.saveSectionLists([...this.getVisibleSectionIds(), sectionId], hiddenSections);
   }
 }
