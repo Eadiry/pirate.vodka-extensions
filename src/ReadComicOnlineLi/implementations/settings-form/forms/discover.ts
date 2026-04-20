@@ -19,41 +19,29 @@ export class DiscoverSettingsForm extends Form {
     const hiddenSectionIds = this.getHiddenSectionIds();
 
     return [
-      this.withEditSelectors(
-        EditSection("visible-discover-sections", {
-          id: "visible-discover-sections",
-          header: visibleSectionIds.length > 0 ? "Visible" : "",
-          footer: visibleSectionIds.length > 0 ? "Drag to reorder. Delete a row to hide it." : "",
-          items: visibleSectionIds.map((sectionId) => this.sectionRow(sectionId)),
-        }),
-        Application.Selector(this as DiscoverSettingsForm, "handleVisibleSectionDelete"),
-        Application.Selector(this as DiscoverSettingsForm, "handleVisibleSectionReorder"),
-      ),
-      this.withEditSelectors(
-        EditSection("hidden-discover-sections", {
-          id: "hidden-discover-sections",
-          header: hiddenSectionIds.length > 0 ? "Hidden" : "",
-          footer: hiddenSectionIds.length > 0 ? "Delete a row to restore it." : "",
-          items: hiddenSectionIds.map((sectionId) => this.sectionRow(sectionId)),
-        }),
-        Application.Selector(this as DiscoverSettingsForm, "handleHiddenSectionDelete"),
-        Application.Selector(this as DiscoverSettingsForm, "handleHiddenSectionReorder"),
-      ),
+      EditSection("visible-discover-sections", {
+        id: "visible-discover-sections",
+        header: visibleSectionIds.length > 0 ? "Visible" : "",
+        footer: visibleSectionIds.length > 0 ? "Drag to reorder. Delete a row to hide it." : "",
+        items: visibleSectionIds.map((sectionId) => this.sectionRow(sectionId)),
+        onDeletion: Application.Selector(
+          this as DiscoverSettingsForm,
+          "handleVisibleSectionDelete",
+        ),
+        onReorder: Application.Selector(
+          this as DiscoverSettingsForm,
+          "handleVisibleSectionReorder",
+        ),
+      }),
+      EditSection("hidden-discover-sections", {
+        id: "hidden-discover-sections",
+        header: hiddenSectionIds.length > 0 ? "Hidden" : "",
+        footer: hiddenSectionIds.length > 0 ? "Delete a row to restore it." : "",
+        items: hiddenSectionIds.map((sectionId) => this.sectionRow(sectionId)),
+        onDeletion: Application.Selector(this as DiscoverSettingsForm, "handleHiddenSectionDelete"),
+        onReorder: Application.Selector(this as DiscoverSettingsForm, "handleHiddenSectionReorder"),
+      }),
     ];
-  }
-
-  private withEditSelectors(
-    section: FormSectionElement<unknown>,
-    onDeletionSelectorId: unknown,
-    onReorderSelectorId: unknown,
-  ): FormSectionElement<unknown> {
-    return {
-      ...section,
-      allowDeletion: true,
-      allowReorder: true,
-      onDeletionSelectorId,
-      onReorderSelectorId,
-    } as unknown as FormSectionElement<unknown>;
   }
 
   private getVisibleSectionIds(): string[] {
