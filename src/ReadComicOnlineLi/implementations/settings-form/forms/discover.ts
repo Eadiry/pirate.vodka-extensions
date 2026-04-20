@@ -22,32 +22,42 @@ export class DiscoverSettingsForm extends Form {
   override getSections(): FormSectionElement<unknown>[] {
     const visibleSectionIds = this.getVisibleSectionIds();
     const hiddenSectionIds = this.getHiddenSectionIds();
+    const sections: FormSectionElement<unknown>[] = [];
     this.hiddenSectionRowSelectHandlers = {};
 
-    return [
-      EditSection("visible-discover-sections", {
-        id: "visible-discover-sections",
-        header: visibleSectionIds.length > 0 ? "Visible" : "",
-        footer: visibleSectionIds.length > 0 ? "Drag to reorder. Delete a row to hide it." : "",
-        items: visibleSectionIds.map((sectionId) => this.sectionRow(sectionId)),
-        onDeletion: Application.Selector(
-          this as DiscoverSettingsForm,
-          "handleVisibleSectionDelete",
+    if (visibleSectionIds.length > 0) {
+      sections.push(
+        EditSection("visible-discover-sections", {
+          id: "visible-discover-sections",
+          header: "Visible Sections",
+          footer: "Long press to reorder. Swipe to remove",
+          items: visibleSectionIds.map((sectionId) => this.sectionRow(sectionId)),
+          onDeletion: Application.Selector(
+            this as DiscoverSettingsForm,
+            "handleVisibleSectionDelete",
+          ),
+          onReorder: Application.Selector(
+            this as DiscoverSettingsForm,
+            "handleVisibleSectionReorder",
+          ),
+        }),
+      );
+    }
+
+    if (hiddenSectionIds.length > 0) {
+      sections.push(
+        Section(
+          {
+            id: "hidden-discover-sections",
+            header: "Hidden Sections",
+            footer: "Tap to restore section",
+          },
+          hiddenSectionIds.map((sectionId) => this.hiddenSectionRow(sectionId)),
         ),
-        onReorder: Application.Selector(
-          this as DiscoverSettingsForm,
-          "handleVisibleSectionReorder",
-        ),
-      }),
-      Section(
-        {
-          id: "hidden-discover-sections",
-          header: hiddenSectionIds.length > 0 ? "Hidden" : "",
-          footer: hiddenSectionIds.length > 0 ? "Tap a row to restore it." : "",
-        },
-        hiddenSectionIds.map((sectionId) => this.hiddenSectionRow(sectionId)),
-      ),
-    ];
+      );
+    }
+
+    return sections;
   }
 
   private getVisibleSectionIds(): string[] {
@@ -77,7 +87,7 @@ export class DiscoverSettingsForm extends Form {
   private hiddenSectionRow(sectionId: string): FormItemElement<unknown> {
     const handler = {
       handleSelect: async (): Promise<void> => {
-        await this.restoreHiddenSection(sectionId);
+        this.restoreHiddenSection(sectionId);
       },
     };
 
@@ -174,7 +184,7 @@ export class DiscoverSettingsForm extends Form {
     this.saveSectionLists(visibleSections, [...this.getHiddenSectionIds(), deletedSectionId]);
   }
 
-  async restoreHiddenSection(sectionId: string): Promise<void> {
+  private restoreHiddenSection(sectionId: string): void {
     const hiddenSections = this.getHiddenSectionIds();
     if (!hiddenSections.includes(sectionId)) {
       return;
