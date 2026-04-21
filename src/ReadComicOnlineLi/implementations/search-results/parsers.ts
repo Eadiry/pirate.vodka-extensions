@@ -12,7 +12,7 @@ export function parseSearchResults($: CheerioAPI): SearchResultItem[] {
 
     const href = $("a", cover).attr("href") ?? "";
     const img = $("img", cover);
-    const title = img.attr("title") ?? $("a", info).first().text().trim() ?? "";
+    const title = img.attr("title")?.trim() || $("a", info).first().text().trim();
     const imageUrl = img.attr("src") ?? "";
     const subtitle = info.find("p").eq(1).text().trim();
 

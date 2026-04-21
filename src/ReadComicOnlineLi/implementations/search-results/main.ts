@@ -86,10 +86,12 @@ export class SearchProvider {
     };
     const $ = await fetchCheerio(request);
     const items = parseSearchResults($);
+    // advanced search returns 32 items while more pages exist
+    const hasMore = items.length === 32;
 
     return {
       items,
-      metadata: items.length > 0 ? { page: page + 1 } : undefined,
+      metadata: hasMore ? { page: page + 1 } : undefined,
     };
   }
 
