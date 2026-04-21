@@ -29,7 +29,7 @@ export class DiscoverSettingsForm extends Form {
       sections.push(
         EditSection("visible-discover-sections", {
           id: "visible-discover-sections",
-          header: "Visible Sections",
+          header: "Prioritized Sections",
           footer: "Long press to reorder. Swipe to remove",
           items: visibleSectionIds.map((sectionId) => this.sectionRow(sectionId)),
           onDeletion: Application.Selector(
@@ -49,8 +49,8 @@ export class DiscoverSettingsForm extends Form {
         Section(
           {
             id: "hidden-discover-sections",
-            header: "Hidden Sections",
-            footer: "Tap to restore section",
+            header: "Available Sections",
+            footer: "Tap to restore",
           },
           hiddenSectionIds.map((sectionId) => this.hiddenSectionRow(sectionId)),
         ),
