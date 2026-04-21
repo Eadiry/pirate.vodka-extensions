@@ -14,6 +14,13 @@ import {
   setDiscoverSectionOrder,
   setHiddenDiscoverSections,
 } from "./main";
+import {
+  getCallbackIndexes,
+  getCallbackRowId,
+  moveSettingId,
+  normalizePrefixedSettingId,
+  removeSettingId,
+} from "../utils";
 
 export class DiscoverSettingsForm extends Form {
   private hiddenSectionRowSelectHandlers: Record<string, { handleSelect: () => Promise<void> }> =
@@ -103,63 +110,21 @@ export class DiscoverSettingsForm extends Form {
     this.reloadForm();
   }
 
-  private moveSection(
-    sectionIds: string[],
-    sourceIndex: number,
-    destinationIndex: number,
-    fallbackSectionId?: string,
-  ): string[] {
-    const sectionId = sectionIds[sourceIndex] ?? fallbackSectionId;
-    if (!sectionId) {
-      return sectionIds;
-    }
-
-    const nextSectionIds = [...sectionIds];
-    this.removeSection(nextSectionIds, sourceIndex, sectionId);
-    const boundedDestinationIndex = Math.max(0, Math.min(destinationIndex, nextSectionIds.length));
-    nextSectionIds.splice(boundedDestinationIndex, 0, sectionId);
-
-    return nextSectionIds;
-  }
-
-  private removeSection(sectionIds: string[], index: number, sectionId: string): void {
-    const existingIndex = sectionIds[index] === sectionId ? index : sectionIds.indexOf(sectionId);
-    if (existingIndex >= 0) {
-      sectionIds.splice(existingIndex, 1);
-    }
-  }
-
   private getSectionIdFromCallbackArgs(args: unknown[]): string | undefined {
-    for (const arg of args) {
-      if (typeof arg === "string") {
-        return this.normalizeCallbackSectionId(arg);
-      }
-
-      if (typeof arg === "object" && arg !== null && "id" in arg) {
-        const rowId = (arg as { id?: unknown }).id;
-        if (typeof rowId === "string") {
-          return this.normalizeCallbackSectionId(rowId);
-        }
-      }
-    }
-
-    return undefined;
-  }
-
-  private getCallbackIndexes(args: unknown[]): number[] {
-    return args.filter((arg): arg is number => typeof arg === "number");
+    const rowId = getCallbackRowId(args);
+    return rowId ? this.normalizeCallbackSectionId(rowId) : undefined;
   }
 
   private normalizeCallbackSectionId(value: string): string | undefined {
-    const sectionId = value.startsWith("discover-section-")
-      ? value.slice("discover-section-".length)
-      : value;
-
-    return getDiscoverSectionDefinition(sectionId) ? sectionId : undefined;
+    return normalizePrefixedSettingId(
+      value,
+      "discover-section-",
+      (sectionId) => getDiscoverSectionDefinition(sectionId) !== undefined,
+    );
   }
 
   async handleVisibleSectionReorder(...args: unknown[]): Promise<void> {
-    const [sourceIndex, destinationIndex] = this.getCallbackIndexes(args);
+    const [sourceIndex, destinationIndex] = getCallbackIndexes(args);
     if (sourceIndex === undefined || destinationIndex === undefined) {
       return;
     }
@@ -167,21 +132,21 @@ export class DiscoverSettingsForm extends Form {
     const sectionId = this.getSectionIdFromCallbackArgs(args);
 
     this.saveSectionLists(
-      this.moveSection(this.getVisibleSectionIds(), sourceIndex, destinationIndex, sectionId),
+      moveSettingId(this.getVisibleSectionIds(), sourceIndex, destinationIndex, sectionId),
       this.getHiddenSectionIds(),
     );
   }
 
   async handleVisibleSectionDelete(...args: unknown[]): Promise<void> {
     const visibleSections = this.getVisibleSectionIds();
-    const [index = -1] = this.getCallbackIndexes(args);
+    const [index = -1] = getCallbackIndexes(args);
     const sectionId = this.getSectionIdFromCallbackArgs(args);
     const deletedSectionId = sectionId ?? visibleSections[index];
     if (!deletedSectionId) {
       return;
     }
 
-    this.removeSection(visibleSections, index, deletedSectionId);
+    removeSettingId(visibleSections, index, deletedSectionId);
     this.saveSectionLists(visibleSections, [...this.getHiddenSectionIds(), deletedSectionId]);
   }
 
@@ -191,7 +156,7 @@ export class DiscoverSettingsForm extends Form {
       return;
     }
 
-    this.removeSection(hiddenSections, hiddenSections.indexOf(sectionId), sectionId);
+    removeSettingId(hiddenSections, hiddenSections.indexOf(sectionId), sectionId);
     this.saveSectionLists([...this.getVisibleSectionIds(), sectionId], hiddenSections);
   }
 }

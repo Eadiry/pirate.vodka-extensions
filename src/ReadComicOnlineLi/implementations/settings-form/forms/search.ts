@@ -21,6 +21,13 @@ import {
 } from "./main";
 import { getSearchGenreOption } from "../../shared/utils";
 import { DEFAULT_PAGE_OPTIONS, SEARCH_STATUS_OPTIONS } from "../models";
+import {
+  getCallbackIndexes,
+  getCallbackRowId,
+  moveSettingId,
+  normalizePrefixedSettingId,
+  removeSettingId,
+} from "../utils";
 
 export class SearchSettingsForm extends Form {
   private hiddenGenreRowSelectHandlers: Record<string, { handleSelect: () => Promise<void> }> = {};
@@ -163,61 +170,21 @@ export class SearchSettingsForm extends Form {
     this.reloadForm();
   }
 
-  private moveGenre(
-    genreIds: string[],
-    sourceIndex: number,
-    destinationIndex: number,
-    fallbackGenreId?: string,
-  ): string[] {
-    const genreId = genreIds[sourceIndex] ?? fallbackGenreId;
-    if (!genreId) {
-      return genreIds;
-    }
-
-    const nextGenreIds = [...genreIds];
-    this.removeGenre(nextGenreIds, sourceIndex, genreId);
-    const boundedDestinationIndex = Math.max(0, Math.min(destinationIndex, nextGenreIds.length));
-    nextGenreIds.splice(boundedDestinationIndex, 0, genreId);
-
-    return nextGenreIds;
-  }
-
-  private removeGenre(genreIds: string[], index: number, genreId: string): void {
-    const existingIndex = genreIds[index] === genreId ? index : genreIds.indexOf(genreId);
-    if (existingIndex >= 0) {
-      genreIds.splice(existingIndex, 1);
-    }
-  }
-
   private getGenreIdFromCallbackArgs(args: unknown[]): string | undefined {
-    for (const arg of args) {
-      if (typeof arg === "string") {
-        return this.normalizeCallbackGenreId(arg);
-      }
-
-      if (typeof arg === "object" && arg !== null && "id" in arg) {
-        const rowId = (arg as { id?: unknown }).id;
-        if (typeof rowId === "string") {
-          return this.normalizeCallbackGenreId(rowId);
-        }
-      }
-    }
-
-    return undefined;
-  }
-
-  private getCallbackIndexes(args: unknown[]): number[] {
-    return args.filter((arg): arg is number => typeof arg === "number");
+    const rowId = getCallbackRowId(args);
+    return rowId ? this.normalizeCallbackGenreId(rowId) : undefined;
   }
 
   private normalizeCallbackGenreId(value: string): string | undefined {
-    const genreId = value.startsWith("search-genre-") ? value.slice("search-genre-".length) : value;
-
-    return getSearchGenreOption(genreId) ? genreId : undefined;
+    return normalizePrefixedSettingId(
+      value,
+      "search-genre-",
+      (genreId) => getSearchGenreOption(genreId) !== undefined,
+    );
   }
 
   async handleVisibleGenreReorder(...args: unknown[]): Promise<void> {
-    const [sourceIndex, destinationIndex] = this.getCallbackIndexes(args);
+    const [sourceIndex, destinationIndex] = getCallbackIndexes(args);
     if (sourceIndex === undefined || destinationIndex === undefined) {
       return;
     }
@@ -225,21 +192,21 @@ export class SearchSettingsForm extends Form {
     const genreId = this.getGenreIdFromCallbackArgs(args);
 
     this.saveGenreLists(
-      this.moveGenre(this.getVisibleGenreIds(), sourceIndex, destinationIndex, genreId),
+      moveSettingId(this.getVisibleGenreIds(), sourceIndex, destinationIndex, genreId),
       this.getHiddenGenreIds(),
     );
   }
 
   async handleVisibleGenreDelete(...args: unknown[]): Promise<void> {
     const visibleGenres = this.getVisibleGenreIds();
-    const [index = -1] = this.getCallbackIndexes(args);
+    const [index = -1] = getCallbackIndexes(args);
     const genreId = this.getGenreIdFromCallbackArgs(args);
     const deletedGenreId = genreId ?? visibleGenres[index];
     if (!deletedGenreId) {
       return;
     }
 
-    this.removeGenre(visibleGenres, index, deletedGenreId);
+    removeSettingId(visibleGenres, index, deletedGenreId);
     this.saveGenreLists(visibleGenres, [...this.getHiddenGenreIds(), deletedGenreId]);
   }
 
@@ -249,7 +216,7 @@ export class SearchSettingsForm extends Form {
       return;
     }
 
-    this.removeGenre(hiddenGenres, hiddenGenres.indexOf(genreId), genreId);
+    removeSettingId(hiddenGenres, hiddenGenres.indexOf(genreId), genreId);
     this.saveGenreLists([...this.getVisibleGenreIds(), genreId], hiddenGenres);
   }
 }

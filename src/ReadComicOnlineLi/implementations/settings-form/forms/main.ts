@@ -1,82 +1,90 @@
 import { Form, type SettingsFormProviding } from "@paperback/types";
-import { normalizeDiscoverSectionIds, normalizeSearchGenreIds } from "../utils";
+import { DEFAULT_DISCOVER_SECTION_IDS, DEFAULT_SEARCH_GENRE_IDS } from "../../shared/models";
+import {
+  DEFAULT_SEARCH_PAGE_KEY,
+  DEFAULT_SEARCH_SORT_KEY,
+  DISCOVER_SECTION_ORDER_KEY,
+  HIDDEN_DISCOVER_SECTIONS_KEY,
+  HIDDEN_SEARCH_GENRES_KEY,
+  SEARCH_GENRE_ORDER_KEY,
+} from "../models";
+import { normalizeSettingIds } from "../utils";
 import { ReadComicOnlineLiSettingsForm } from "./landing";
 
 export function getHiddenDiscoverSections(): string[] {
-  return normalizeDiscoverSectionIds(
-    Application.getState("readcomiconlineli-hidden-discover-sections"),
+  return normalizeSettingIds(
+    Application.getState(HIDDEN_DISCOVER_SECTIONS_KEY),
+    DEFAULT_DISCOVER_SECTION_IDS,
     false,
   );
 }
 
 export function setHiddenDiscoverSections(value: string[]): void {
   Application.setState(
-    normalizeDiscoverSectionIds(value, false),
-    "readcomiconlineli-hidden-discover-sections",
+    normalizeSettingIds(value, DEFAULT_DISCOVER_SECTION_IDS, false),
+    HIDDEN_DISCOVER_SECTIONS_KEY,
   );
 }
 
 export function getDiscoverSectionOrder(): string[] {
-  return normalizeDiscoverSectionIds(
-    Application.getState("readcomiconlineli-discover-section-order"),
+  return normalizeSettingIds(
+    Application.getState(DISCOVER_SECTION_ORDER_KEY),
+    DEFAULT_DISCOVER_SECTION_IDS,
     true,
   );
 }
 
 export function setDiscoverSectionOrder(value: string[]): void {
   Application.setState(
-    normalizeDiscoverSectionIds(value, true),
-    "readcomiconlineli-discover-section-order",
+    normalizeSettingIds(value, DEFAULT_DISCOVER_SECTION_IDS, true),
+    DISCOVER_SECTION_ORDER_KEY,
   );
 }
 
 export function getHiddenSearchGenres(): string[] {
-  return normalizeSearchGenreIds(
-    Application.getState("readcomiconlineli-hidden-search-genres"),
+  return normalizeSettingIds(
+    Application.getState(HIDDEN_SEARCH_GENRES_KEY),
+    DEFAULT_SEARCH_GENRE_IDS,
     false,
   );
 }
 
 export function setHiddenSearchGenres(value: string[]): void {
   Application.setState(
-    normalizeSearchGenreIds(value, false),
-    "readcomiconlineli-hidden-search-genres",
+    normalizeSettingIds(value, DEFAULT_SEARCH_GENRE_IDS, false),
+    HIDDEN_SEARCH_GENRES_KEY,
   );
 }
 
 export function getSearchGenreOrder(): string[] {
-  return normalizeSearchGenreIds(
-    Application.getState("readcomiconlineli-search-genre-order"),
+  return normalizeSettingIds(
+    Application.getState(SEARCH_GENRE_ORDER_KEY),
+    DEFAULT_SEARCH_GENRE_IDS,
     true,
   );
 }
 
 export function setSearchGenreOrder(value: string[]): void {
   Application.setState(
-    normalizeSearchGenreIds(value, true),
-    "readcomiconlineli-search-genre-order",
+    normalizeSettingIds(value, DEFAULT_SEARCH_GENRE_IDS, true),
+    SEARCH_GENRE_ORDER_KEY,
   );
 }
 
 export function getDefaultSearchSort(): string {
-  return (
-    (Application.getState("readcomiconlineli-default-search-sort") as string | undefined) ?? ""
-  );
+  return (Application.getState(DEFAULT_SEARCH_SORT_KEY) as string | undefined) ?? "";
 }
 
 export function setDefaultSearchSort(value: string): void {
-  Application.setState(value, "readcomiconlineli-default-search-sort");
+  Application.setState(value, DEFAULT_SEARCH_SORT_KEY);
 }
 
 export function getDefaultSearchPage(): string {
-  return (
-    (Application.getState("readcomiconlineli-default-search-page") as string | undefined) ??
-    "most-popular"
-  );
+  return (Application.getState(DEFAULT_SEARCH_PAGE_KEY) as string | undefined) ?? "most-popular";
 }
 
 export function setDefaultSearchPage(value: string): void {
-  Application.setState(value, "readcomiconlineli-default-search-page");
+  Application.setState(value, DEFAULT_SEARCH_PAGE_KEY);
 }
 
 export class SettingsFormProvider implements SettingsFormProviding {
