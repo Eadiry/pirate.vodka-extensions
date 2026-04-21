@@ -39,13 +39,14 @@ export class DiscoverProvider {
     }
 
     if (definition.source === "desktop-tab") {
-      const $ = await fetchCheerio({
+      const request: Request = {
         url: DOMAIN,
         method: "GET",
         headers: {
           cookie: "dsk_ui=1",
         },
-      });
+      };
+      const $ = await fetchCheerio(request);
 
       return {
         items: parseDesktopTabItems($, definition.tabId),
