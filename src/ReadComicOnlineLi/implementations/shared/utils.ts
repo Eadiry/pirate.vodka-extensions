@@ -61,8 +61,8 @@ export function beauDecode(url: string): string | null {
   // strip 9-byte padding before the final 2 chars
   path = path.substring(0, path.length - 11) + path[path.length - 2] + path[path.length - 1];
 
-  // decode real cdn path without native atob
-  const decoded = b64decode(path);
+  // decode real cdn path
+  const decoded = Application.base64Decode(path);
 
   // strip 4-byte decoded path padding at position 13
   let result = decoded.substring(0, 13) + decoded.substring(17);
@@ -75,36 +75,4 @@ export function beauDecode(url: string): string | null {
   const imagePath = result.startsWith("/") ? result : `/${result}`;
 
   return host + imagePath + queryParams;
-}
-
-const B64 = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
-
-// atob/Application.base64Decode are unsafe in Paperback here
-function b64decode(input: string): string {
-  let output = "";
-  const str = input.replace(/=+$/, "");
-  const remainder = str.length % 4;
-  const fullLen = str.length - remainder;
-
-  for (let i = 0; i < fullLen; i += 4) {
-    const bits =
-      (B64.indexOf(str[i]) << 18) |
-      (B64.indexOf(str[i + 1]) << 12) |
-      (B64.indexOf(str[i + 2]) << 6) |
-      B64.indexOf(str[i + 3]);
-    output += String.fromCharCode((bits >> 16) & 0xff, (bits >> 8) & 0xff, bits & 0xff);
-  }
-
-  if (remainder === 2) {
-    const bits = (B64.indexOf(str[fullLen]) << 18) | (B64.indexOf(str[fullLen + 1]) << 12);
-    output += String.fromCharCode((bits >> 16) & 0xff);
-  } else if (remainder === 3) {
-    const bits =
-      (B64.indexOf(str[fullLen]) << 18) |
-      (B64.indexOf(str[fullLen + 1]) << 12) |
-      (B64.indexOf(str[fullLen + 2]) << 6);
-    output += String.fromCharCode((bits >> 16) & 0xff, (bits >> 8) & 0xff);
-  }
-
-  return output;
 }
