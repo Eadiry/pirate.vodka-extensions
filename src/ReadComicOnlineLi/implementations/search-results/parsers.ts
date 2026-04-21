@@ -1,7 +1,7 @@
 import type { SearchFilter, SearchResultItem } from "@paperback/types";
 import { ContentRating } from "@paperback/types";
 import type { CheerioAPI } from "cheerio";
-import { DOMAIN, type FilterEntry } from "../shared/models";
+import { DOMAIN, type FilterEntry, type SearchGenreOption } from "../shared/models";
 
 export function parseSearchResults($: CheerioAPI): SearchResultItem[] {
   const results: SearchResultItem[] = [];
@@ -74,22 +74,11 @@ function readMultiselectFilterByState(
     .map(([id]) => id);
 }
 
-export function buildSearchFilters($: CheerioAPI): SearchFilter[] {
-  const genreOptions = $("ul#genres li")
-    .map((_, element) => {
-      const select = $("select[gid]", element);
-      const id = select.attr("gid")?.trim() ?? "";
-      const value = $("a[name='aGenre']", element).text().trim();
-
-      if (!id || !value) {
-        return undefined;
-      }
-
-      return { id, value: Application.decodeHTMLEntities(value) };
-    })
-    .get()
-    .filter((option): option is { id: string; value: string } => option !== undefined);
-
+export function buildSearchFilters(
+  $: CheerioAPI,
+  genreOptions: SearchGenreOption[],
+): SearchFilter[] {
+  const filters: SearchFilter[] = [];
   const yearOptions = $("select#pubDate option")
     .map((_, element) => ({
       id: $(element).attr("value")?.trim() ?? "",
@@ -97,8 +86,8 @@ export function buildSearchFilters($: CheerioAPI): SearchFilter[] {
     }))
     .get();
 
-  return [
-    {
+  if (genreOptions.length > 0) {
+    filters.push({
       type: "multiselect",
       id: "genres",
       title: "Genres",
@@ -107,13 +96,16 @@ export function buildSearchFilters($: CheerioAPI): SearchFilter[] {
       allowExclusion: true,
       allowEmptySelection: true,
       maximum: undefined,
-    },
-    {
-      type: "dropdown",
-      id: "publicationYear",
-      title: "Year",
-      options: yearOptions,
-      value: "",
-    },
-  ];
+    });
+  }
+
+  filters.push({
+    type: "dropdown",
+    id: "publicationYear",
+    title: "Year",
+    options: yearOptions,
+    value: "",
+  });
+
+  return filters;
 }

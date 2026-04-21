@@ -21,6 +21,67 @@ export const SORT_OPTIONS: SortingOption[] = [
   { id: "Completed", label: "Completed" },
 ];
 
+export type SearchGenreOption = {
+  id: string;
+  value: string;
+};
+
+export const SEARCH_GENRE_OPTIONS: SearchGenreOption[] = [
+  { id: "1", value: "Action" },
+  { id: "2", value: "Adventure" },
+  { id: "38", value: "Anthology" },
+  { id: "46", value: "Anthropomorphic" },
+  { id: "41", value: "Biography" },
+  { id: "49", value: "Children" },
+  { id: "3", value: "Comedy" },
+  { id: "17", value: "Crime" },
+  { id: "19", value: "Drama" },
+  { id: "25", value: "Family" },
+  { id: "20", value: "Fantasy" },
+  { id: "31", value: "Fighting" },
+  { id: "5", value: "Graphic Novels" },
+  { id: "28", value: "Historical" },
+  { id: "15", value: "Horror" },
+  { id: "35", value: "Leading Ladies" },
+  { id: "51", value: "LGBTQ" },
+  { id: "44", value: "Literature" },
+  { id: "40", value: "Manga" },
+  { id: "4", value: "Martial Arts" },
+  { id: "8", value: "Mature" },
+  { id: "33", value: "Military" },
+  { id: "56", value: "Mini-Series" },
+  { id: "47", value: "Movies & TV" },
+  { id: "55", value: "Music" },
+  { id: "23", value: "Mystery" },
+  { id: "21", value: "Mythology" },
+  { id: "48", value: "Personal" },
+  { id: "42", value: "Political" },
+  { id: "43", value: "Post-Apocalyptic" },
+  { id: "27", value: "Psychological" },
+  { id: "39", value: "Pulp" },
+  { id: "53", value: "Religious" },
+  { id: "9", value: "Robots" },
+  { id: "32", value: "Romance" },
+  { id: "58", value: "Satire" },
+  { id: "52", value: "School Life" },
+  { id: "16", value: "Sci-Fi" },
+  { id: "50", value: "Slice of Life" },
+  { id: "54", value: "Sport" },
+  { id: "30", value: "Spy" },
+  { id: "22", value: "Superhero" },
+  { id: "24", value: "Supernatural" },
+  { id: "29", value: "Suspense" },
+  { id: "57", value: "Teen" },
+  { id: "18", value: "Thriller" },
+  { id: "34", value: "Vampires" },
+  { id: "37", value: "Video Games" },
+  { id: "26", value: "War" },
+  { id: "45", value: "Western" },
+  { id: "36", value: "Zombies" },
+];
+
+export const DEFAULT_SEARCH_GENRE_IDS = SEARCH_GENRE_OPTIONS.map((genre) => genre.id);
+
 export type ListDiscoverSectionDefinition = {
   id: string;
   title: string;

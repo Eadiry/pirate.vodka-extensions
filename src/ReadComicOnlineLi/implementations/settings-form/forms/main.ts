@@ -1,5 +1,5 @@
 import { Form, type SettingsFormProviding } from "@paperback/types";
-import { normalizeDiscoverSectionIds } from "../../shared/utils";
+import { normalizeDiscoverSectionIds, normalizeSearchGenreIds } from "../utils";
 import { ReadComicOnlineLiSettingsForm } from "./landing";
 
 export function getHiddenDiscoverSections(): string[] {
@@ -27,6 +27,34 @@ export function setDiscoverSectionOrder(value: string[]): void {
   Application.setState(
     normalizeDiscoverSectionIds(value, true),
     "readcomiconlineli-discover-section-order",
+  );
+}
+
+export function getHiddenSearchGenres(): string[] {
+  return normalizeSearchGenreIds(
+    Application.getState("readcomiconlineli-hidden-search-genres"),
+    false,
+  );
+}
+
+export function setHiddenSearchGenres(value: string[]): void {
+  Application.setState(
+    normalizeSearchGenreIds(value, false),
+    "readcomiconlineli-hidden-search-genres",
+  );
+}
+
+export function getSearchGenreOrder(): string[] {
+  return normalizeSearchGenreIds(
+    Application.getState("readcomiconlineli-search-genre-order"),
+    true,
+  );
+}
+
+export function setSearchGenreOrder(value: string[]): void {
+  Application.setState(
+    normalizeSearchGenreIds(value, true),
+    "readcomiconlineli-search-genre-order",
   );
 }
 

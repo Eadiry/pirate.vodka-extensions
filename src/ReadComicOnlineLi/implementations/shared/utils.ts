@@ -1,9 +1,10 @@
 import {
-  DEFAULT_DISCOVER_SECTION_IDS,
   DISCOVER_SECTIONS,
   DOMAIN_IMAGE,
   DOMAIN_IMAGE_PROXY,
+  SEARCH_GENRE_OPTIONS,
   type DiscoverSectionDefinition,
+  type SearchGenreOption,
 } from "./models";
 
 export function applyMixins(derivedCtor: any, constructors: any[]) {
@@ -18,48 +19,14 @@ export function applyMixins(derivedCtor: any, constructors: any[]) {
   });
 }
 
-export function slugFromUrl(url: string): string {
-  return url.split("/").filter(Boolean).pop() ?? url;
-}
-
-export function cleanText(raw: string): string {
-  return raw
-    .replace(/\u00a0/g, " ")
-    .replace(/&nbsp;/g, " ")
-    .trim();
-}
-
 export function getDiscoverSectionDefinition(
   sectionId: string,
 ): DiscoverSectionDefinition | undefined {
   return DISCOVER_SECTIONS.find((section) => section.id === sectionId);
 }
 
-export function normalizeDiscoverSectionIds(value: unknown, includeMissing: boolean): string[] {
-  const knownSectionIds = new Set(DEFAULT_DISCOVER_SECTION_IDS);
-  const normalizedSectionIds: string[] = [];
-
-  if (Array.isArray(value)) {
-    for (const sectionId of value) {
-      if (
-        typeof sectionId === "string" &&
-        knownSectionIds.has(sectionId) &&
-        !normalizedSectionIds.includes(sectionId)
-      ) {
-        normalizedSectionIds.push(sectionId);
-      }
-    }
-  }
-
-  if (includeMissing) {
-    for (const sectionId of DEFAULT_DISCOVER_SECTION_IDS) {
-      if (!normalizedSectionIds.includes(sectionId)) {
-        normalizedSectionIds.push(sectionId);
-      }
-    }
-  }
-
-  return normalizedSectionIds;
+export function getSearchGenreOption(genreId: string): SearchGenreOption | undefined {
+  return SEARCH_GENRE_OPTIONS.find((genre) => genre.id === genreId);
 }
 
 // reimplements rguard beau() image URL decoding
@@ -113,7 +80,7 @@ export function beauDecode(url: string): string | null {
 const B64 = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 
 // atob/Application.base64Decode are unsafe in Paperback here
-export function b64decode(input: string): string {
+function b64decode(input: string): string {
   let output = "";
   const str = input.replace(/=+$/, "");
   const remainder = str.length % 4;

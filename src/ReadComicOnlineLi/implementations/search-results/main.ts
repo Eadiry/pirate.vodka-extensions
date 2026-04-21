@@ -7,9 +7,15 @@ import type {
   SortingOption,
 } from "@paperback/types";
 import { URL } from "@paperback/types";
-import { DOMAIN, SORT_OPTIONS, type FilterEntry } from "../shared/models";
+import { DOMAIN, SORT_OPTIONS, type FilterEntry, type SearchGenreOption } from "../shared/models";
 import { fetchCheerio } from "../../services/network";
-import { getDefaultSearchPage, getDefaultSearchSort } from "../settings-form/forms/main";
+import {
+  getDefaultSearchPage,
+  getDefaultSearchSort,
+  getHiddenSearchGenres,
+  getSearchGenreOrder,
+} from "../settings-form/forms/main";
+import { getSearchGenreOption } from "../shared/utils";
 import {
   buildSearchFilters,
   parseHasNextPage,
@@ -27,7 +33,7 @@ export class SearchProvider {
     };
     const $ = await fetchCheerio(request);
 
-    return buildSearchFilters($);
+    return buildSearchFilters($, getVisibleSearchGenreOptions());
   }
 
   async getSearchResults(
@@ -94,6 +100,15 @@ export class SearchProvider {
 
 function formatGenreValues(values: string[]): string {
   return values.length > 0 ? `${values.join(",")},` : "";
+}
+
+function getVisibleSearchGenreOptions(): SearchGenreOption[] {
+  const hiddenGenres = getHiddenSearchGenres();
+
+  return getSearchGenreOrder()
+    .filter((genreId) => !hiddenGenres.includes(genreId))
+    .map((genreId) => getSearchGenreOption(genreId))
+    .filter((genre): genre is SearchGenreOption => genre !== undefined);
 }
 
 function buildDefaultSearchPageUrl(page: number): string {
