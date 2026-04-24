@@ -7,7 +7,10 @@ import {
   type Request,
 } from "@paperback/types";
 import { fetchCheerio } from "../../services/network";
-import { getDiscoverSectionOrder, getHiddenDiscoverSections } from "../settings-form/forms/main";
+import {
+  getDiscoverSectionOrder,
+  getHiddenDiscoverSections,
+} from "../settings-form-providing/forms/main";
 import { DOMAIN, type DiscoverSectionDefinition, type Metadata } from "../shared/models";
 import { getDiscoverSectionDefinition } from "../shared/utils";
 import { parseDesktopTabItems, parseDiscoverItems } from "./parsers";
@@ -35,7 +38,7 @@ export class DiscoverProvider {
   ): Promise<PagedResults<DiscoverSectionItem>> {
     const definition = getDiscoverSectionDefinition(section.id);
     if (!definition) {
-      throw new Error(`[ReadComicOnlineLi] Unknown discover section: ${section.id}`);
+      throw new Error(`[ReadComicOnline] Unknown discover section: ${section.id}`);
     }
 
     if (definition.source === "desktop-tab") {
