@@ -1,12 +1,16 @@
 import type {
   PagedResults,
   Request,
-  SearchFilter,
   SearchQuery,
   SearchResultItem,
   SortingOption,
 } from "@paperback/types";
 import { URL } from "@paperback/types";
+import {
+  SearchFilterForm,
+  type SearchFilter,
+  type SearchFilterValue,
+} from "@paperback/types/lib/compat/0.8";
 import {
   DOMAIN_API,
   PAGE_SIZE,
@@ -26,13 +30,12 @@ import {
 
 export class SearchProvider {
   async getSearchResults(
-    query: SearchQuery,
-    metadata: Metadata,
+    query: SearchQuery<SearchFilterValue[]>,
+    metadata?: Metadata,
     sortingOption?: SortingOption,
   ): Promise<PagedResults<SearchResultItem>> {
     const page = metadata?.page ?? 1;
-    type FilterEntry = { id: string; value: string | Record<string, "included" | "excluded"> };
-    const filters = (query.filters ?? []) as FilterEntry[];
+    const filters = query.metadata ?? [];
 
     const searchTerm = (query.title ?? "")
       .trim()
@@ -111,6 +114,10 @@ export class SearchProvider {
     }
 
     return buildSearchFilters(genres, STATUS_OPTIONS, TYPE_OPTIONS);
+  }
+
+  getAdvancedSearchForm(query: SearchQuery<SearchFilterValue[]>) {
+    return new SearchFilterForm(query.metadata, this.getSearchFilters());
   }
 
   async getSortingOptions(): Promise<SortingOption[]> {

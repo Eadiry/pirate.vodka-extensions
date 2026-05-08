@@ -1,14 +1,13 @@
-import type { SearchFilter, SearchResultItem } from "@paperback/types";
+import type { SearchResultItem } from "@paperback/types";
 import { ContentRating } from "@paperback/types";
+import type { SearchFilter, SearchFilterValue } from "@paperback/types/lib/compat/0.8";
 import type { VortexGenre, VortexQueryResponse } from "../shared/models";
 import { buildMangaId } from "../shared/utils";
 
-type FilterValue = string | Record<string, "included" | "excluded">;
-type FilterEntry = { id: string; value: FilterValue };
 type DropdownOption = { id: string; value: string };
 
 export function readDropdownFilter(
-  filters: FilterEntry[],
+  filters: SearchFilterValue[],
   filterId: string,
   fallback: string,
 ): string {
@@ -19,7 +18,7 @@ export function readDropdownFilter(
   return typeof value === "string" && value.trim() ? value.trim() : fallback;
 }
 
-export function readMultiselectFilter(filters: FilterEntry[], filterId: string): string[] {
+export function readMultiselectFilter(filters: SearchFilterValue[], filterId: string): string[] {
   const entry = filters.find((filter) => filter.id === filterId);
   if (!entry) return [];
 
@@ -31,7 +30,10 @@ export function readMultiselectFilter(filters: FilterEntry[], filterId: string):
     .map(([id]) => id);
 }
 
-export function readExcludedMultiselectFilter(filters: FilterEntry[], filterId: string): string[] {
+export function readExcludedMultiselectFilter(
+  filters: SearchFilterValue[],
+  filterId: string,
+): string[] {
   const entry = filters.find((filter) => filter.id === filterId);
   if (!entry) return [];
 

@@ -1,13 +1,17 @@
 import type {
   PagedResults,
   Request,
-  SearchFilter,
   SearchQuery,
   SearchResultItem,
   SortingOption,
 } from "@paperback/types";
 import { URL } from "@paperback/types";
-import { DOMAIN, SORT_OPTIONS, type FilterEntry, type SearchGenreOption } from "../shared/models";
+import {
+  SearchFilterForm,
+  type SearchFilter,
+  type SearchFilterValue,
+} from "@paperback/types/lib/compat/0.8";
+import { DOMAIN, SORT_OPTIONS, type SearchGenreOption } from "../shared/models";
 import { fetchCheerio } from "../../services/network";
 import {
   getDefaultSearchPage,
@@ -36,14 +40,18 @@ export class SearchProvider {
     return buildSearchFilters($, getVisibleSearchGenreOptions());
   }
 
+  getAdvancedSearchForm(query: SearchQuery<SearchFilterValue[]>) {
+    return new SearchFilterForm(query.metadata, this.getSearchFilters());
+  }
+
   async getSearchResults(
-    query: SearchQuery,
+    query: SearchQuery<SearchFilterValue[]>,
     metadata?: { page?: number },
     sortingOption?: SortingOption,
   ): Promise<PagedResults<SearchResultItem>> {
     const page = metadata?.page ?? 1;
     const searchTerm = query.title?.trim() ?? "";
-    const filters = (query.filters ?? []) as FilterEntry[];
+    const filters = query.metadata ?? [];
     const includedGenres = readMultiselectFilter(filters, "genres");
     const excludedGenres = readExcludedMultiselectFilter(filters, "genres");
     const status = sortingOption?.id ?? getDefaultSearchSort();

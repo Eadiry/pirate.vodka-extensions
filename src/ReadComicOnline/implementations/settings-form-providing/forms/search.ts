@@ -166,7 +166,7 @@ export class SearchSettingsForm extends Form {
   private saveGenreLists(visibleGenres: string[], hiddenGenres: string[]): void {
     setHiddenSearchGenres(hiddenGenres);
     setSearchGenreOrder([...visibleGenres, ...hiddenGenres]);
-    Application.invalidateSearchFilters();
+    // Application.invalidateSearchFilters();
     this.reloadForm();
   }
 
