@@ -1,11 +1,15 @@
 import {
   DISCOVER_SECTIONS,
+  DOMAIN,
+  DOMAIN_ALT,
   DOMAIN_IMAGE,
   DOMAIN_IMAGE_PROXY,
   SEARCH_GENRE_OPTIONS,
+  type DomainMode,
   type DiscoverSectionDefinition,
   type SearchGenreOption,
 } from "./models";
+import { DOMAIN_MODE_KEY, USE_BACKUP_DOMAIN_FALLBACK_KEY } from "../settings-form-providing/models";
 
 export function applyMixins(derivedCtor: any, constructors: any[]) {
   constructors.forEach((baseCtor) => {
@@ -27,6 +31,60 @@ export function getDiscoverSectionDefinition(
 
 export function getSearchGenreOption(genreId: string): SearchGenreOption | undefined {
   return SEARCH_GENRE_OPTIONS.find((genre) => genre.id === genreId);
+}
+
+export function getDomainMode(): DomainMode {
+  return Application.getState(DOMAIN_MODE_KEY) === "backup" ? "backup" : "main";
+}
+
+export function setDomainMode(value: string): void {
+  Application.setState(value === "backup" ? "backup" : "main", DOMAIN_MODE_KEY);
+}
+
+export function getUseBackupDomainFallback(): boolean {
+  return (Application.getState(USE_BACKUP_DOMAIN_FALLBACK_KEY) as boolean | undefined) ?? false;
+}
+
+export function setUseBackupDomainFallback(value: boolean): void {
+  Application.setState(value, USE_BACKUP_DOMAIN_FALLBACK_KEY);
+}
+
+export function getReadComicOnlineDomain(): string {
+  return getDomainMode() === "backup" ? DOMAIN_ALT : DOMAIN;
+}
+
+export function getReadComicOnlineDomainForUrl(url: string): string {
+  if (isReadComicOnlineDomainUrl(url, DOMAIN_ALT)) return DOMAIN_ALT;
+  if (isReadComicOnlineDomainUrl(url, DOMAIN)) return DOMAIN;
+  return getReadComicOnlineDomain();
+}
+
+export function rewriteToPreferredReadComicOnlineDomain(url: string): string {
+  if (getDomainMode() === "backup" && isReadComicOnlineDomainUrl(url, DOMAIN)) {
+    return `${DOMAIN_ALT}${url.slice(DOMAIN.length)}`;
+  }
+
+  return url;
+}
+
+export function rewriteToBackupReadComicOnlineDomain(url: string): string {
+  if (isReadComicOnlineDomainUrl(url, DOMAIN)) {
+    return `${DOMAIN_ALT}${url.slice(DOMAIN.length)}`;
+  }
+
+  return url;
+}
+
+export function shouldRetryReadComicOnlineBackup(url: string): boolean {
+  return (
+    getDomainMode() === "main" &&
+    getUseBackupDomainFallback() &&
+    isReadComicOnlineDomainUrl(url, DOMAIN)
+  );
+}
+
+function isReadComicOnlineDomainUrl(url: string, domain: string): boolean {
+  return url === domain || url.startsWith(`${domain}/`);
 }
 
 // reimplements rguard beau() image URL decoding

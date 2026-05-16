@@ -2,6 +2,12 @@ import type { Request, Response } from "@paperback/types";
 import { CloudflareError, PaperbackInterceptor } from "@paperback/types";
 import * as cheerio from "cheerio";
 import { DOMAIN } from "../implementations/shared/models";
+import {
+  getReadComicOnlineDomainForUrl,
+  rewriteToBackupReadComicOnlineDomain,
+  rewriteToPreferredReadComicOnlineDomain,
+  shouldRetryReadComicOnlineBackup,
+} from "../implementations/shared/utils";
 
 const IMAGE_PROXY_PREFIX = `${DOMAIN}/__pb__/img/`;
 const CHAPTER_PAGE_STATE_PREFIX = "readcomiconline:chapter-pages:";
@@ -9,14 +15,17 @@ const chapterPageCache = new Map<string, string[]>();
 
 export class ReadComicOnlineInterceptor extends PaperbackInterceptor {
   async interceptRequest(request: Request): Promise<Request> {
-    const rewrittenUrl = resolveImageRequestUrl(request.url);
+    const rewrittenUrl = rewriteToPreferredReadComicOnlineDomain(
+      resolveImageRequestUrl(request.url),
+    );
+    const refererDomain = getReadComicOnlineDomainForUrl(rewrittenUrl);
 
     return {
       ...request,
       url: rewrittenUrl,
       headers: {
         ...request.headers,
-        referer: `${DOMAIN}/`,
+        referer: `${refererDomain}/`,
         "user-agent": await Application.getDefaultUserAgent(),
       },
     };
@@ -43,6 +52,26 @@ export class ReadComicOnlineInterceptor extends PaperbackInterceptor {
 }
 
 export async function fetchCheerio(request: Request): Promise<cheerio.CheerioAPI> {
+  const preferredRequest = {
+    ...request,
+    url: rewriteToPreferredReadComicOnlineDomain(request.url),
+  };
+
+  try {
+    return await fetchCheerioRequest(preferredRequest);
+  } catch (error) {
+    if (!shouldRetryReadComicOnlineBackup(preferredRequest.url)) {
+      throw error;
+    }
+
+    return fetchCheerioRequest({
+      ...preferredRequest,
+      url: rewriteToBackupReadComicOnlineDomain(preferredRequest.url),
+    });
+  }
+}
+
+async function fetchCheerioRequest(request: Request): Promise<cheerio.CheerioAPI> {
   const [response, data] = await Application.scheduleRequest(request);
 
   if (response.status !== 200) {

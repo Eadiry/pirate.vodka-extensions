@@ -1,8 +1,11 @@
 import type { SortingOption } from "@paperback/types";
 
 export const DOMAIN = "https://readcomiconline.li";
+export const DOMAIN_ALT = "https://rcostation.xyz";
 export const DOMAIN_IMAGE = "https://2.bp.blogspot.com";
 export const DOMAIN_IMAGE_PROXY = "https://ano1.rconet.biz/pic";
+
+export type DomainMode = "main" | "backup";
 
 export type Metadata = {
   page?: number;

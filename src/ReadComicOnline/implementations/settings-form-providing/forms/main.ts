@@ -1,5 +1,15 @@
 import { Form, type SettingsFormProviding } from "@paperback/types";
-import { DEFAULT_DISCOVER_SECTION_IDS, DEFAULT_SEARCH_GENRE_IDS } from "../../shared/models";
+import {
+  DEFAULT_DISCOVER_SECTION_IDS,
+  DEFAULT_SEARCH_GENRE_IDS,
+  type DomainMode,
+} from "../../shared/models";
+import {
+  getDomainMode as getStoredDomainMode,
+  getUseBackupDomainFallback as getStoredUseBackupDomainFallback,
+  setDomainMode as setStoredDomainMode,
+  setUseBackupDomainFallback as setStoredUseBackupDomainFallback,
+} from "../../shared/utils";
 import {
   DEFAULT_SEARCH_PAGE_KEY,
   DEFAULT_SEARCH_SORT_KEY,
@@ -94,6 +104,22 @@ export function getUseHighQualityImages(): boolean {
 
 export function setUseHighQualityImages(value: boolean): void {
   Application.setState(value, USE_HIGH_QUALITY_IMAGES_KEY);
+}
+
+export function getDomainMode(): DomainMode {
+  return getStoredDomainMode();
+}
+
+export function setDomainMode(value: string): void {
+  setStoredDomainMode(value);
+}
+
+export function getUseBackupDomainFallback(): boolean {
+  return getStoredUseBackupDomainFallback();
+}
+
+export function setUseBackupDomainFallback(value: boolean): void {
+  setStoredUseBackupDomainFallback(value);
 }
 
 export class SettingsFormProvider implements SettingsFormProviding {
