@@ -3,14 +3,24 @@ import {
   Form,
   LabelRow,
   Section,
+  ToggleRow,
   type FormItemElement,
   type FormSectionElement,
   type SelectorID,
+  type ToggleRowProps,
 } from "@paperback/types";
+import {
+  CONSOLIDATED_DISCOVER_GROUPS,
+  type ConsolidatedDiscoverGroupDefinition,
+} from "../../shared/models";
 import { getDiscoverSectionDefinition } from "../../shared/utils";
 import {
+  getConsolidateDiscoverSections,
+  getConsolidatedDiscoverGroupOrder,
   getDiscoverSectionOrder,
   getHiddenDiscoverSections,
+  setConsolidateDiscoverSections,
+  setConsolidatedDiscoverGroupOrder,
   setDiscoverSectionOrder,
   setHiddenDiscoverSections,
 } from "./main";
@@ -29,15 +39,43 @@ export class DiscoverSettingsForm extends Form {
   override getSections(): FormSectionElement<unknown>[] {
     const visibleSectionIds = this.getVisibleSectionIds();
     const hiddenSectionIds = this.getHiddenSectionIds();
-    const sections: FormSectionElement<unknown>[] = [];
+    const sections: FormSectionElement<unknown>[] = [
+      Section(
+        {
+          id: "discover-consolidation",
+          footer: "Group related discover sections into selectable chips.\n\n",
+        },
+        [this.consolidateDiscoverSectionsRow()],
+      ),
+    ];
     this.hiddenSectionRowSelectHandlers = {};
+
+    if (getConsolidateDiscoverSections()) {
+      const visibleGroupIds = this.getVisibleConsolidatedGroupIds();
+
+      if (visibleGroupIds.length > 0) {
+        sections.push(
+          EditSection("visible-consolidated-discover-groups", {
+            id: "visible-consolidated-discover-groups",
+            header: "Consolidated Section Order",
+            footer: "Long press to reorder. Hide all child sections below to hide a group.\n\n",
+            items: visibleGroupIds.map((groupId) => this.consolidatedGroupRow(groupId)),
+            allowReorder: true,
+            onReorder: Application.Selector(
+              this as DiscoverSettingsForm,
+              "handleConsolidatedGroupReorder",
+            ),
+          }),
+        );
+      }
+    }
 
     if (visibleSectionIds.length > 0) {
       sections.push(
         EditSection("visible-discover-sections", {
           id: "visible-discover-sections",
           header: "Prioritized Sections",
-          footer: "Long press to reorder. Swipe to remove",
+          footer: "Long press to reorder. Swipe to remove\n\n",
           items: visibleSectionIds.map((sectionId) => this.sectionRow(sectionId)),
           allowDeletion: true,
           allowReorder: true,
@@ -59,7 +97,7 @@ export class DiscoverSettingsForm extends Form {
           {
             id: "hidden-discover-sections",
             header: "Available Sections",
-            footer: "Tap to restore",
+            footer: "Tap to restore\n\n",
           },
           hiddenSectionIds.map((sectionId) => this.hiddenSectionRow(sectionId)),
         ),
@@ -67,6 +105,19 @@ export class DiscoverSettingsForm extends Form {
     }
 
     return sections;
+  }
+
+  private consolidateDiscoverSectionsRow(): FormItemElement<unknown> {
+    const props: ToggleRowProps = {
+      title: "Consolidate Discover Sections",
+      value: getConsolidateDiscoverSections(),
+      onValueChange: Application.Selector(
+        this as DiscoverSettingsForm,
+        "handleConsolidateDiscoverSectionsChange",
+      ),
+    };
+
+    return ToggleRow("consolidate-discover-sections", props);
   }
 
   private getVisibleSectionIds(): string[] {
@@ -105,9 +156,36 @@ export class DiscoverSettingsForm extends Form {
     return this.sectionRow(sectionId, Application.Selector(handler, "handleSelect"));
   }
 
+  private getVisibleConsolidatedGroupIds(): string[] {
+    const hiddenSections = getHiddenDiscoverSections();
+
+    return getConsolidatedDiscoverGroupOrder().filter((groupId) => {
+      const group = this.getConsolidatedGroup(groupId);
+
+      return group?.sections.some((tag) => !hiddenSections.includes(tag.sectionId)) ?? false;
+    });
+  }
+
+  private getConsolidatedGroup(groupId: string): ConsolidatedDiscoverGroupDefinition | undefined {
+    return CONSOLIDATED_DISCOVER_GROUPS.find((group) => group.id === groupId);
+  }
+
+  private consolidatedGroupRow(groupId: string): FormItemElement<unknown> {
+    const group = this.getConsolidatedGroup(groupId);
+
+    return LabelRow(`consolidated-discover-group-${groupId}`, {
+      title: group?.title ?? groupId,
+    });
+  }
+
   private saveSectionLists(visibleSections: string[], hiddenSections: string[]): void {
     setHiddenDiscoverSections(hiddenSections);
     setDiscoverSectionOrder([...visibleSections, ...hiddenSections]);
+    Application.invalidateDiscoverSections();
+    this.reloadForm();
+  }
+
+  private saveConsolidatedSettings(): void {
     Application.invalidateDiscoverSections();
     this.reloadForm();
   }
@@ -123,6 +201,18 @@ export class DiscoverSettingsForm extends Form {
       "discover-section-",
       (sectionId) => getDiscoverSectionDefinition(sectionId) !== undefined,
     );
+  }
+
+  private getConsolidatedGroupIdFromCallbackArgs(args: unknown[]): string | undefined {
+    const rowId = getCallbackRowId(args);
+
+    return rowId
+      ? normalizePrefixedSettingId(
+          rowId,
+          "consolidated-discover-group-",
+          (groupId) => this.getConsolidatedGroup(groupId) !== undefined,
+        )
+      : undefined;
   }
 
   async handleVisibleSectionReorder(...args: unknown[]): Promise<void> {
@@ -150,6 +240,43 @@ export class DiscoverSettingsForm extends Form {
 
     removeSettingId(visibleSections, index, deletedSectionId);
     this.saveSectionLists(visibleSections, [...this.getHiddenSectionIds(), deletedSectionId]);
+  }
+
+  async handleConsolidateDiscoverSectionsChange(value: boolean): Promise<void> {
+    setConsolidateDiscoverSections(value);
+    this.saveConsolidatedSettings();
+  }
+
+  async handleConsolidatedGroupReorder(...args: unknown[]): Promise<void> {
+    const [sourceIndex, destinationIndex] = getCallbackIndexes(args);
+    if (sourceIndex === undefined || destinationIndex === undefined) {
+      return;
+    }
+
+    const groupId = this.getConsolidatedGroupIdFromCallbackArgs(args);
+    const visibleGroupIds = this.getVisibleConsolidatedGroupIds();
+    const nextVisibleGroupIds = moveSettingId(
+      visibleGroupIds,
+      sourceIndex,
+      destinationIndex,
+      groupId,
+    );
+    const visibleGroupIdSet = new Set(visibleGroupIds);
+    const visibleGroupQueue = [...nextVisibleGroupIds];
+    const nextGroupOrder = getConsolidatedDiscoverGroupOrder().map((currentGroupId) =>
+      visibleGroupIdSet.has(currentGroupId)
+        ? (visibleGroupQueue.shift() ?? currentGroupId)
+        : currentGroupId,
+    );
+
+    for (const remainingGroupId of visibleGroupQueue) {
+      if (!nextGroupOrder.includes(remainingGroupId)) {
+        nextGroupOrder.push(remainingGroupId);
+      }
+    }
+
+    setConsolidatedDiscoverGroupOrder(nextGroupOrder);
+    this.saveConsolidatedSettings();
   }
 
   private restoreHiddenSection(sectionId: string): void {

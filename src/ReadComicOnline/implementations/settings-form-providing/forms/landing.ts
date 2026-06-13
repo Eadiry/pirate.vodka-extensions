@@ -48,7 +48,7 @@ export class ReadComicOnlineSettingsForm extends Form {
           id: showBackupDomainFallback ? "domainSettings-main" : "domainSettings-backup",
           header: "",
           footer: showBackupDomainFallback
-            ? "Retry the backup domain when the main domain request fails"
+            ? "Retry the backup domain when the main domain request fails\n\n"
             : undefined,
         },
         domainRows,

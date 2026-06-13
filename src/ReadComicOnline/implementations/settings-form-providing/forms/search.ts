@@ -39,7 +39,7 @@ export class SearchSettingsForm extends Form {
       Section(
         {
           id: "default-sort",
-          footer: "Status option applied by default in search.",
+          footer: "Status option applied by default in search.\n\n",
         },
         [this.defaultSortRow()],
       ),
@@ -50,7 +50,7 @@ export class SearchSettingsForm extends Form {
         Section(
           {
             id: "default-search-page",
-            footer: "Page used when search is opened without a query or filters.",
+            footer: "Page used when search is opened without a query or filters.\n\n",
           },
           [this.defaultSearchPageRow()],
         ),
@@ -64,7 +64,7 @@ export class SearchSettingsForm extends Form {
         EditSection("visible-search-genres", {
           id: "visible-search-genres",
           header: "Prioritized Genres",
-          footer: "Long press to reorder. Swipe to remove",
+          footer: "Long press to reorder. Swipe to remove\n\n",
           items: visibleGenreIds.map((genreId) => this.genreRow(genreId)),
           allowDeletion: true,
           allowReorder: true,
@@ -80,7 +80,7 @@ export class SearchSettingsForm extends Form {
           {
             id: "hidden-search-genres",
             header: "Available Genres",
-            footer: "Tap to restore",
+            footer: "Tap to restore\n\n",
           },
           hiddenGenreIds.map((genreId) => this.hiddenGenreRow(genreId)),
         ),

@@ -1,5 +1,6 @@
 import { Form, type SettingsFormProviding } from "@paperback/types";
 import {
+  DEFAULT_CONSOLIDATED_DISCOVER_GROUP_IDS,
   DEFAULT_DISCOVER_SECTION_IDS,
   DEFAULT_SEARCH_GENRE_IDS,
   type DomainMode,
@@ -11,6 +12,8 @@ import {
   setUseBackupDomainFallback as setStoredUseBackupDomainFallback,
 } from "../../shared/utils";
 import {
+  CONSOLIDATE_DISCOVER_SECTIONS_KEY,
+  CONSOLIDATED_DISCOVER_GROUP_ORDER_KEY,
   DEFAULT_SEARCH_PAGE_KEY,
   DEFAULT_SEARCH_SORT_KEY,
   DISCOVER_SECTION_ORDER_KEY,
@@ -49,6 +52,29 @@ export function setDiscoverSectionOrder(value: string[]): void {
   Application.setState(
     normalizeSettingIds(value, DEFAULT_DISCOVER_SECTION_IDS, true),
     DISCOVER_SECTION_ORDER_KEY,
+  );
+}
+
+export function getConsolidateDiscoverSections(): boolean {
+  return (Application.getState(CONSOLIDATE_DISCOVER_SECTIONS_KEY) as boolean | undefined) ?? false;
+}
+
+export function setConsolidateDiscoverSections(value: boolean): void {
+  Application.setState(value, CONSOLIDATE_DISCOVER_SECTIONS_KEY);
+}
+
+export function getConsolidatedDiscoverGroupOrder(): string[] {
+  return normalizeSettingIds(
+    Application.getState(CONSOLIDATED_DISCOVER_GROUP_ORDER_KEY),
+    DEFAULT_CONSOLIDATED_DISCOVER_GROUP_IDS,
+    true,
+  );
+}
+
+export function setConsolidatedDiscoverGroupOrder(value: string[]): void {
+  Application.setState(
+    normalizeSettingIds(value, DEFAULT_CONSOLIDATED_DISCOVER_GROUP_IDS, true),
+    CONSOLIDATED_DISCOVER_GROUP_ORDER_KEY,
   );
 }
 

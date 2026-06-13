@@ -1,25 +1,33 @@
-import type {
-  PagedResults,
-  Request,
-  SearchQuery,
-  SearchResultItem,
-  SortingOption,
+import {
+  AdvancedSearchForm,
+  URL,
+  type FormSectionElement,
+  type PagedResults,
+  type Request,
+  type SearchQuery,
+  type SearchResultItem,
+  type SortingOption,
 } from "@paperback/types";
-import { URL } from "@paperback/types";
 import {
   SearchFilterForm,
   type SearchFilter,
   type SearchFilterValue,
 } from "@paperback/types/lib/compat/0.8";
-import { DOMAIN, SORT_OPTIONS, type SearchGenreOption } from "../shared/models";
+import {
+  DISCOVER_SECTION_SEARCH_METADATA_ID,
+  DOMAIN,
+  SORT_OPTIONS,
+  type SearchGenreOption,
+} from "../shared/models";
 import { fetchCheerio } from "../../services/network";
+import { parseDesktopTabItems } from "../discover-section-providing/parsers";
 import {
   getDefaultSearchPage,
   getDefaultSearchSort,
   getHiddenSearchGenres,
   getSearchGenreOrder,
 } from "../settings-form-providing/forms/main";
-import { getSearchGenreOption } from "../shared/utils";
+import { getDiscoverSectionDefinition, getSearchGenreOption } from "../shared/utils";
 import {
   buildSearchFilters,
   parseHasNextPage,
@@ -40,8 +48,13 @@ export class SearchProvider {
     return buildSearchFilters($, getVisibleSearchGenreOptions());
   }
 
-  getAdvancedSearchForm(query: SearchQuery<SearchFilterValue[]>) {
-    return new SearchFilterForm(query.metadata, this.getSearchFilters());
+  getAdvancedSearchForm(query: SearchQuery<SearchFilterValue[]>): AdvancedSearchForm {
+    const filters = query.metadata ?? [];
+    if (readDiscoverSectionSearchId(filters)) {
+      return new DiscoverSectionSearchForm(filters);
+    }
+
+    return new SearchFilterForm(filters, this.getSearchFilters());
   }
 
   async getSearchResults(
@@ -50,6 +63,11 @@ export class SearchProvider {
     sortingOption?: SortingOption,
   ): Promise<PagedResults<SearchResultItem>> {
     const page = metadata?.page ?? 1;
+    const discoverSectionId = readDiscoverSectionSearchId(query.metadata ?? []);
+    if (discoverSectionId) {
+      return getDiscoverSectionSearchResults(discoverSectionId, page);
+    }
+
     const searchTerm = query.title?.trim() ?? "";
     const filters = query.metadata ?? [];
     const includedGenres = readMultiselectFilter(filters, "genres");
@@ -103,9 +121,70 @@ export class SearchProvider {
     };
   }
 
-  async getSortingOptions(): Promise<SortingOption[]> {
+  async getSortingOptions(query?: SearchQuery<SearchFilterValue[]>): Promise<SortingOption[]> {
+    if (query && readDiscoverSectionSearchId(query.metadata ?? [])) {
+      return [];
+    }
+
     return SORT_OPTIONS;
   }
+}
+
+class DiscoverSectionSearchForm extends AdvancedSearchForm {
+  constructor(private readonly filters: SearchFilterValue[]) {
+    super();
+  }
+
+  override getSections(): FormSectionElement<unknown>[] {
+    return [];
+  }
+
+  override getSearchQueryMetadata(): SearchFilterValue[] {
+    return this.filters;
+  }
+}
+
+async function getDiscoverSectionSearchResults(
+  sectionId: string,
+  page: number,
+): Promise<PagedResults<SearchResultItem>> {
+  const definition = getDiscoverSectionDefinition(sectionId);
+  if (!definition) {
+    throw new Error(`[ReadComicOnline] Unknown discover search section: ${sectionId}`);
+  }
+
+  if (definition.source === "desktop-tab") {
+    const request: Request = {
+      url: DOMAIN,
+      method: "GET",
+      headers: {
+        cookie: "dsk_ui=1",
+      },
+    };
+    const $ = await fetchCheerio(request);
+
+    return {
+      items: parseDesktopTabItems($, definition.tabId).map((item) => item as SearchResultItem),
+      metadata: undefined,
+    };
+  }
+
+  const request: Request = {
+    url: buildDiscoverListUrl(definition.path, page),
+    method: "GET",
+  };
+  const $ = await fetchCheerio(request);
+  const items = parseSearchResults($);
+
+  return {
+    items,
+    metadata: parseHasNextPage($) ? { page: page + 1 } : undefined,
+  };
+}
+
+function readDiscoverSectionSearchId(filters: SearchFilterValue[]): string | undefined {
+  const entry = filters.find((filter) => filter.id === DISCOVER_SECTION_SEARCH_METADATA_ID);
+  return typeof entry?.value === "string" ? entry.value : undefined;
 }
 
 function formatGenreValues(values: string[]): string {
@@ -140,4 +219,18 @@ function buildDefaultSearchPageUrl(page: number): string {
 
   path.setQueryItem("page", String(page));
   return path.toString();
+}
+
+function buildDiscoverListUrl(path: string[], page: number): string {
+  const url = new URL(DOMAIN);
+
+  for (const segment of path) {
+    url.addPathComponent(segment);
+  }
+
+  if (page > 1) {
+    url.setQueryItem("page", String(page));
+  }
+
+  return url.toString();
 }

@@ -103,6 +103,19 @@ export type DiscoverSectionDefinition =
   | ListDiscoverSectionDefinition
   | DesktopTabDiscoverSectionDefinition;
 
+export type ConsolidatedDiscoverTagDefinition = {
+  sectionId: string;
+  title: string;
+};
+
+export type ConsolidatedDiscoverGroupDefinition = {
+  id: string;
+  title: string;
+  sections: ConsolidatedDiscoverTagDefinition[];
+};
+
+export const DISCOVER_SECTION_SEARCH_METADATA_ID = "readcomiconline-discover-section";
+
 export const DISCOVER_SECTIONS: DiscoverSectionDefinition[] = [
   {
     id: "latest-update",
@@ -191,3 +204,48 @@ export const DISCOVER_SECTIONS: DiscoverSectionDefinition[] = [
 ];
 
 export const DEFAULT_DISCOVER_SECTION_IDS = DISCOVER_SECTIONS.map((section) => section.id);
+
+export const CONSOLIDATED_DISCOVER_GROUPS: ConsolidatedDiscoverGroupDefinition[] = [
+  {
+    id: "consolidated-top",
+    title: "Top",
+    sections: [
+      { sectionId: "top-day", title: "Day" },
+      { sectionId: "top-week", title: "Week" },
+      { sectionId: "top-month", title: "Month" },
+    ],
+  },
+  {
+    id: "consolidated-all-comics",
+    title: "All Comics",
+    sections: [
+      { sectionId: "latest-update", title: "Latest" },
+      { sectionId: "new-comic", title: "New" },
+      { sectionId: "most-popular", title: "Popular" },
+    ],
+  },
+  {
+    id: "consolidated-marvel-comics",
+    title: "Marvel Comics",
+    sections: [
+      { sectionId: "marvel-comics-alphabetical", title: "Alphabetical" },
+      { sectionId: "marvel-comics-latest", title: "Latest" },
+      { sectionId: "marvel-comics-popular", title: "Popular" },
+      { sectionId: "marvel-comics-new", title: "New" },
+    ],
+  },
+  {
+    id: "consolidated-dc-comics",
+    title: "DC Comics",
+    sections: [
+      { sectionId: "dc-comics-alphabetical", title: "Alphabetical" },
+      { sectionId: "dc-comics-latest", title: "Latest" },
+      { sectionId: "dc-comics-popular", title: "Popular" },
+      { sectionId: "dc-comics-new", title: "New" },
+    ],
+  },
+];
+
+export const DEFAULT_CONSOLIDATED_DISCOVER_GROUP_IDS = CONSOLIDATED_DISCOVER_GROUPS.map(
+  (group) => group.id,
+);
