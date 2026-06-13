@@ -39,6 +39,8 @@ export class DiscoverSettingsForm extends Form {
           header: "Prioritized Sections",
           footer: "Long press to reorder. Swipe to remove",
           items: visibleSectionIds.map((sectionId) => this.sectionRow(sectionId)),
+          allowDeletion: true,
+          allowReorder: true,
           onDeletion: Application.Selector(
             this as DiscoverSettingsForm,
             "handleVisibleSectionDelete",

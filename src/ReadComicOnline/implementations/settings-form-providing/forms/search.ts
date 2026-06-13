@@ -66,6 +66,8 @@ export class SearchSettingsForm extends Form {
           header: "Prioritized Genres",
           footer: "Long press to reorder. Swipe to remove",
           items: visibleGenreIds.map((genreId) => this.genreRow(genreId)),
+          allowDeletion: true,
+          allowReorder: true,
           onDeletion: Application.Selector(this as SearchSettingsForm, "handleVisibleGenreDelete"),
           onReorder: Application.Selector(this as SearchSettingsForm, "handleVisibleGenreReorder"),
         }),
