@@ -96,22 +96,14 @@ export class SearchProvider {
       };
     }
 
-    const url = new URL(DOMAIN)
-      .addPathComponent("AdvanceSearch")
-      .setQueryItem("comicName", searchTerm)
-      .setQueryItem("ig", formatGenreValues(includedGenres))
-      .setQueryItem("eg", formatGenreValues(excludedGenres))
-      .setQueryItem("status", status)
-      .setQueryItem("pubDate", publicationYear)
-      .setQueryItem("page", String(page))
-      .toString();
-
-    const request: Request = {
-      url,
-      method: "GET",
-    };
-    const $ = await fetchCheerio(request);
-    const items = parseSearchResults($);
+    const items = await fetchAdvancedSearchResults({
+      searchTerm,
+      includedGenres,
+      excludedGenres,
+      status,
+      publicationYear,
+      page,
+    });
     // advanced search returns 32 items while more pages exist
     const hasMore = items.length === 32;
 
@@ -189,6 +181,87 @@ function readDiscoverSectionSearchId(filters: SearchFilterValue[]): string | und
 
 function formatGenreValues(values: string[]): string {
   return values.length > 0 ? `${values.join(",")},` : "";
+}
+
+type AdvancedSearchRequest = {
+  searchTerm: string;
+  includedGenres: string[];
+  excludedGenres: string[];
+  status: string;
+  publicationYear: string;
+  page: number;
+};
+
+async function fetchAdvancedSearchResults(
+  searchRequest: AdvancedSearchRequest,
+): Promise<SearchResultItem[]> {
+  const terms = buildSearchTermVariants(searchRequest.searchTerm);
+
+  for (const term of terms) {
+    const request: Request = {
+      url: buildAdvancedSearchUrl({ ...searchRequest, searchTerm: term }),
+      method: "GET",
+    };
+    const $ = await fetchCheerio(request);
+    const items = parseSearchResults($);
+
+    if (items.length > 0 || term === terms[terms.length - 1]) {
+      return items;
+    }
+  }
+
+  return [];
+}
+
+function buildAdvancedSearchUrl(searchRequest: AdvancedSearchRequest): string {
+  return new URL(DOMAIN)
+    .addPathComponent("AdvanceSearch")
+    .setQueryItem("comicName", searchRequest.searchTerm)
+    .setQueryItem("ig", formatGenreValues(searchRequest.includedGenres))
+    .setQueryItem("eg", formatGenreValues(searchRequest.excludedGenres))
+    .setQueryItem("status", searchRequest.status)
+    .setQueryItem("pubDate", searchRequest.publicationYear)
+    .setQueryItem("page", String(searchRequest.page))
+    .toString();
+}
+
+function buildSearchTermVariants(searchTerm: string): string[] {
+  const normalizedTerm = normalizeSearchTerm(searchTerm);
+  if (!normalizedTerm) return [""];
+
+  const variants = [normalizedTerm];
+  const withoutBracketedText = normalizeSearchTerm(
+    normalizedTerm.replace(/\([^)]*\)|\[[^\]]*]|\{[^}]*}/g, " "),
+  );
+  const punctuationNormalized = normalizeSearchTerm(
+    normalizedTerm.replace(/[()[\]{}:;,.!?'"“”‘’#&/\\_-]+/g, " "),
+  );
+
+  variants.push(
+    withoutBracketedText,
+    removeTrailingYear(normalizedTerm),
+    punctuationNormalized,
+    removeTrailingYear(punctuationNormalized),
+  );
+
+  return variants.filter(
+    (variant, index) =>
+      variant.length > 0 &&
+      variants.findIndex((candidate) => candidate.toLowerCase() === variant.toLowerCase()) ===
+        index,
+  );
+}
+
+function normalizeSearchTerm(value: string): string {
+  return value
+    .replace(/[\u2018\u2019]/g, "'")
+    .replace(/[\u201C\u201D]/g, '"')
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function removeTrailingYear(value: string): string {
+  return normalizeSearchTerm(value.replace(/\s+(?:19|20)\d{2}$/, ""));
 }
 
 function getVisibleSearchGenreOptions(): SearchGenreOption[] {
