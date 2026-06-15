@@ -12,5 +12,4 @@ To add these extensions to Paperback, install from [here]
 
 Make a pull request if you want to.
 
-[here]:
-https://read.pirate.vodka
+[here]: https://read.pirate.vodka
