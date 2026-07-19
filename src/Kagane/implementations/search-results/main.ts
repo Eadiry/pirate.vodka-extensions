@@ -35,9 +35,7 @@ import { buildImageUrl, getContentRatingValues, getPaperbackContentRating } from
 import {
   buildSearchFilters,
   findIdsByName,
-  parseTagInput,
   readDropdownFilter,
-  readInputFilter,
   readMultiselectFilter,
 } from "./parsers";
 
@@ -144,18 +142,6 @@ export function buildSearchBody(
     );
   }
 
-  const tagInput = readInputFilter(filters, "tags");
-  if (tagInput) {
-    const tags = parseTagInput(tagInput);
-    if (tags.included.length > 0 || tags.excluded.length > 0) {
-      body.tags = buildCompoundFilter(
-        tags.included,
-        tags.excluded,
-        readDropdownFilter(filters, "tags_match_all", "true") === "true",
-      );
-    }
-  }
-
   return body;
 }
 
@@ -187,7 +173,7 @@ function mapSearchResult(
   const title =
     showSource && sourceName ? `${book.title.trim()} [${sourceName}]` : book.title.trim();
   const subtitles = [
-    typeof book.current_books === "number" ? `${book.current_books} Books` : undefined,
+    typeof book.current_books === "number" ? `${book.current_books} Chapters` : undefined,
     book.start_year ? String(book.start_year) : undefined,
   ].filter((value): value is string => Boolean(value));
 

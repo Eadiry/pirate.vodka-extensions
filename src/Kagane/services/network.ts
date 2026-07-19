@@ -41,8 +41,8 @@ export class KaganeInterceptor extends PaperbackInterceptor {
   ): Promise<ArrayBuffer> {
     if (await isCloudflareChallenge(request, response, data)) {
       throw new CloudflareError({
-        url: request.url,
-        method: request.method ?? "GET",
+        url: `${BASE_URL}/`,
+        method: "GET",
         headers: {
           ...request.headers,
           "user-agent": await Application.getDefaultUserAgent(),

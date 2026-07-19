@@ -20,7 +20,7 @@ export function mapDiscoverItem(
     mangaId: book.series_id,
     title: showSource && sourceName ? `${book.title.trim()} [${sourceName}]` : book.title.trim(),
     imageUrl: buildImageUrl(book.cover_image_id),
-    subtitle: typeof book.current_books === "number" ? `${book.current_books} Books` : undefined,
+    subtitle: typeof book.current_books === "number" ? `${book.current_books} Chapters` : undefined,
     contentRating: getPaperbackContentRating(book.content_rating),
   };
 }

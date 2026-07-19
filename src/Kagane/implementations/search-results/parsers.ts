@@ -21,11 +21,6 @@ export function readDropdownFilter(
   return typeof entry?.value === "string" && entry.value ? entry.value : fallback;
 }
 
-export function readInputFilter(filters: SearchFilterValue[], filterId: string): string {
-  const entry = filters.find((filter) => filter.id === filterId);
-  return typeof entry?.value === "string" ? entry.value.trim() : "";
-}
-
 export function readMultiselectFilter(
   filters: SearchFilterValue[],
   filterId: string,
@@ -46,22 +41,6 @@ export function findIdsByName(names: string[], values: Record<string, string>): 
       return Object.entries(values).find(([, value]) => value.toLowerCase() === lowerName)?.[0];
     })
     .filter((value): value is string => Boolean(value));
-}
-
-export function parseTagInput(input: string): { included: string[]; excluded: string[] } {
-  const included: string[] = [];
-  const excluded: string[] = [];
-
-  for (const rawEntry of input.split(",")) {
-    const entry = rawEntry.trim();
-    if (!entry) continue;
-
-    const shouldExclude = entry.startsWith("-");
-    const tagName = shouldExclude ? entry.slice(1).trim() : entry;
-    if (!tagName) continue;
-  }
-
-  return { included, excluded };
 }
 
 export function buildSearchFilters(metadata: KaganeMetadata, displayMode: string): SearchFilter[] {
@@ -109,16 +88,6 @@ export function buildSearchFilters(metadata: KaganeMetadata, displayMode: string
       allowExclusion: true,
       allowEmptySelection: true,
       maximum: undefined,
-    },
-    {
-      type: "dropdown",
-      id: "tags_match_all",
-      title: "Tag Matching",
-      options: [
-        { id: "true", value: "Match All Entered Tags" },
-        { id: "false", value: "Match Any Entered Tag" },
-      ],
-      value: "true",
     },
     {
       type: "multiselect",
