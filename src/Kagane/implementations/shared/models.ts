@@ -4,7 +4,7 @@
 import type { SortingOption } from "@paperback/types";
 
 export const BASE_URL = "https://kagane.to";
-export const API_URL = "https://yuzuki.kagane.to";
+export const API_URL = BASE_URL;
 export const DEFAULT_CACHE_URL = "https://akari.kagane.to";
 export const PAGE_SIZE = 35;
 
