@@ -5,15 +5,11 @@ import { DOMAIN } from "../shared/models";
 import type { VortexPost } from "../shared/models";
 import { buildMangaId } from "../shared/utils";
 
-type SerializedValue<T> = [number, T];
-
 interface VortexSeriesPageProps {
-  post?: SerializedValue<{
-    postContent?: SerializedValue<string>;
-  }>;
+  post?: VortexPost;
 }
 
-export function parseMangaPostContent(html: string): string | undefined {
+export function parseMangaPage(html: string): VortexPost | undefined {
   const $ = cheerio.load(html);
   const propsValue = $("astro-island")
     .filter((_, element) => {
@@ -22,22 +18,22 @@ export function parseMangaPostContent(html: string): string | undefined {
     .first()
     .attr("props");
 
-  if (propsValue) {
-    try {
-      const props = JSON.parse(propsValue) as VortexSeriesPageProps;
-      const postContent = props.post?.[1].postContent?.[1]?.trim();
-      if (postContent) return postContent;
-    } catch {
-      // Fall back to page metadata when the serialized island shape changes.
-    }
-  }
+  if (!propsValue) return undefined;
 
-  return $("meta[name='description']").attr("content")?.trim() || undefined;
+  try {
+    const props = deserializeAstroValue(JSON.parse(propsValue)) as VortexSeriesPageProps;
+    const post = props.post;
+
+    return post && typeof post.id === "number" && post.slug && post.postTitle ? post : undefined;
+  } catch {
+    return undefined;
+  }
 }
 
-export function parseMangaDetails(post: VortexPost): SourceManga {
-  const mangaId = buildMangaId(post.id, post.slug);
-
+export function parseMangaDetails(
+  post: VortexPost,
+  mangaId = buildMangaId(post.id, post.slug),
+): SourceManga {
   const synopsis = Application.decodeHTMLEntities((post.postContent ?? "").replace(/<[^>]+>/g, ""));
   const secondaryTitles = post.alternativeTitles
     ? post.alternativeTitles
@@ -77,4 +73,21 @@ export function parseMangaDetails(post: VortexPost): SourceManga {
       shareUrl: `${DOMAIN}/series/${post.slug}`,
     },
   };
+}
+
+function deserializeAstroValue(value: unknown): unknown {
+  if (Array.isArray(value)) {
+    if (value.length === 2 && typeof value[0] === "number") {
+      return deserializeAstroValue(value[1]);
+    }
+    return value.map(deserializeAstroValue);
+  }
+
+  if (value && typeof value === "object") {
+    return Object.fromEntries(
+      Object.entries(value).map(([key, entry]) => [key, deserializeAstroValue(entry)]),
+    );
+  }
+
+  return value;
 }
