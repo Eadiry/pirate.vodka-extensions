@@ -11,7 +11,7 @@ export interface VortexPost {
   slug: string;
   postTitle: string;
   postContent?: string;
-  alternativeTitles: string;
+  alternativeTitles?: string;
   featuredImage: string;
   featuredImageCL: string;
   hot: boolean;
@@ -30,7 +30,7 @@ export interface VortexPost {
   saleEndDate: string | null;
   genres: VortexGenre[];
   chapters: VortexChapter[];
-  _count: { chapters: number };
+  _count?: { chapters: number };
   createdby?: { name: string };
   author?: string;
   artist?: string;

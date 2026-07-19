@@ -1,10 +1,10 @@
 import type { Request, SourceManga } from "@paperback/types";
 import { URL } from "@paperback/types";
-import { DOMAIN_API, PAGE_SIZE } from "../shared/models";
+import { DOMAIN, DOMAIN_API, PAGE_SIZE } from "../shared/models";
 import type { VortexPost, VortexQueryResponse } from "../shared/models";
 import { parseMangaId } from "../shared/utils";
-import { fetchJSON } from "../../services/network";
-import { parseMangaDetails } from "./parsers";
+import { fetchJSON, fetchText } from "../../services/network";
+import { parseMangaDetails, parseMangaPostContent } from "./parsers";
 
 function buildQueryUrl(searchTerm: string): string {
   return new URL(DOMAIN_API)
@@ -42,6 +42,16 @@ async function queryMangaDetails(mangaId: string, slug: string): Promise<VortexP
   return undefined;
 }
 
+async function getMangaPostContent(slug: string): Promise<string | undefined> {
+  try {
+    const url = new URL(DOMAIN).addPathComponent("series").addPathComponent(slug).toString();
+    const html = await fetchText({ url, method: "GET" });
+    return parseMangaPostContent(html);
+  } catch {
+    return undefined;
+  }
+}
+
 export class MangaProvider {
   async getMangaDetails(mangaId: string): Promise<SourceManga> {
     const parsed = parseMangaId(mangaId);
@@ -54,7 +64,8 @@ export class MangaProvider {
     try {
       const queried = await queryMangaDetails(parsed.id, slug);
       if (queried) {
-        return parseMangaDetails(queried);
+        const postContent = await getMangaPostContent(slug);
+        return parseMangaDetails(postContent ? { ...queried, postContent } : queried);
       }
     } catch {
       // fall through to the final not-found error

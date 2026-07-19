@@ -88,12 +88,13 @@ export function parseSearchResults(data: VortexQueryResponse): SearchResultItem[
     .filter((post) => post.postTitle && post.postTitle.trim().length > 0 && !post.isNovel)
     .map((post) => {
       const mangaId = buildMangaId(post.id, post.slug);
+      const latestChapter = post.chapters?.[0];
 
       return {
         mangaId,
         title: Application.decodeHTMLEntities(post.postTitle),
         imageUrl: post.featuredImage || "",
-        subtitle: `${post._count?.chapters ?? 0} Chapters`,
+        subtitle: `${latestChapter?.number ?? post._count?.chapters ?? 0} Chapters`,
         contentRating: ContentRating.EVERYONE,
       };
     });
