@@ -5,9 +5,8 @@ import type { DiscoverSection, DiscoverSectionItem, PagedResults, Request } from
 import { DiscoverSectionType, URL } from "@paperback/types";
 
 import { apiHeaders, fetchJSON, getKaganeMetadata } from "../../services/network";
-import { getContentRatingSetting, getShowSource } from "../settings-form/main";
+import { getShowSource } from "../settings-form/main";
 import { API_URL, PAGE_SIZE, type SearchDto } from "../shared/models";
-import { getPaperbackContentRating } from "../shared/utils";
 import { buildSearchBody } from "../search-results/main";
 import { mapDiscoverItem } from "./parsers";
 
@@ -55,9 +54,8 @@ export class DiscoverProvider {
       body: JSON.stringify(body),
     };
     const data = await fetchJSON<SearchDto>(request);
-    const contentRating = getPaperbackContentRating(getContentRatingSetting());
     const items = (data.content ?? []).map((book) =>
-      mapDiscoverItem(book, kaganeMetadata.sources, getShowSource(), contentRating),
+      mapDiscoverItem(book, kaganeMetadata.sources, getShowSource()),
     );
 
     return {

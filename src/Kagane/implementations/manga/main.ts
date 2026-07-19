@@ -5,7 +5,7 @@ import type { Request, SourceManga } from "@paperback/types";
 import { URL } from "@paperback/types";
 
 import { apiHeaders, fetchJSON, getKaganeMetadata } from "../../services/network";
-import { getContentRatingSetting, getShowEdition, getShowSource } from "../settings-form/main";
+import { getShowEdition, getShowSource } from "../settings-form/main";
 import { API_URL, type DetailsDto, type KaganeMetadata } from "../shared/models";
 import { parseMangaDetails } from "./parsers";
 
@@ -27,7 +27,6 @@ export class MangaProvider {
     return parseMangaDetails(mangaId, data, metadata, {
       showEdition: getShowEdition(),
       showSource: getShowSource(),
-      contentRating: getContentRatingSetting(),
     });
   }
 }

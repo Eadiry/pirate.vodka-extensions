@@ -40,10 +40,18 @@ export function getContentRatingValues(maxRating: KaganeContentRating): string[]
   return CONTENT_RATING_VALUES.slice(0, Math.max(index, 0) + 1).map(titleCase);
 }
 
-export function getPaperbackContentRating(maxRating: KaganeContentRating): ContentRating {
-  if (maxRating === "pornographic") return ContentRating.ADULT;
-  if (maxRating === "erotica" || maxRating === "suggestive") return ContentRating.MATURE;
-  return ContentRating.EVERYONE;
+export function getPaperbackContentRating(contentRating?: string | null): ContentRating {
+  switch (contentRating?.trim().toLowerCase()) {
+    case "safe":
+      return ContentRating.EVERYONE;
+    case "suggestive":
+    case "erotica":
+      return ContentRating.MATURE;
+    case "pornographic":
+      return ContentRating.ADULT;
+    default:
+      return ContentRating.MATURE;
+  }
 }
 
 export function parseKaganeDate(value?: string | null): Date | undefined {

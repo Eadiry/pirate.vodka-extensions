@@ -3,12 +3,7 @@
 
 import type { SourceManga, TagSection } from "@paperback/types";
 
-import {
-  BASE_URL,
-  type DetailsDto,
-  type KaganeContentRating,
-  type KaganeMetadata,
-} from "../shared/models";
+import { BASE_URL, type DetailsDto, type KaganeMetadata } from "../shared/models";
 import {
   buildImageUrl,
   getPaperbackContentRating,
@@ -23,7 +18,6 @@ export function parseMangaDetails(
   options: {
     showEdition: boolean;
     showSource: boolean;
-    contentRating: KaganeContentRating;
   },
 ): SourceManga {
   const sourceName = data.source_id
@@ -52,7 +46,7 @@ export function parseMangaDetails(
       author: joinUnique(authors),
       artist: joinUnique(artists),
       status: mapPublicationStatus(data.upload_status),
-      contentRating: getPaperbackContentRating(options.contentRating),
+      contentRating: getPaperbackContentRating(data.content_rating),
       tagGroups,
       shareUrl: `${BASE_URL}/series/${mangaId}`,
     },

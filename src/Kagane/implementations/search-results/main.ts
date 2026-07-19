@@ -88,12 +88,9 @@ export class SearchProvider {
     const sourceMap = new Map(
       kaganeMetadata.sources.map((source) => [source.source_id, source.title]),
     );
-    const contentRating = getPaperbackContentRating(getContentRatingSetting());
     const showSource = getShowSource();
 
-    const items = (data.content ?? []).map((book) =>
-      mapSearchResult(book, sourceMap, showSource, contentRating),
-    );
+    const items = (data.content ?? []).map((book) => mapSearchResult(book, sourceMap, showSource));
 
     return {
       items,
@@ -185,7 +182,6 @@ function mapSearchResult(
   book: KaganeSearchBook,
   sources: Map<string, string>,
   showSource: boolean,
-  contentRating: SearchResultItem["contentRating"],
 ): SearchResultItem {
   const sourceName = book.source_id ? sources.get(book.source_id) : undefined;
   const title =
@@ -200,6 +196,6 @@ function mapSearchResult(
     title,
     imageUrl: buildImageUrl(book.cover_image_id),
     subtitle: subtitles.join(" - "),
-    contentRating,
+    contentRating: getPaperbackContentRating(book.content_rating),
   };
 }

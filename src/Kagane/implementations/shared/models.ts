@@ -188,6 +188,7 @@ export interface KaganeSearchBook {
   series_id: string;
   title: string;
   source_id?: string | null;
+  content_rating?: string | null;
   current_books?: number;
   start_year?: number | null;
   cover_image_id?: string | null;
@@ -199,6 +200,7 @@ export interface DetailsDto {
   description?: string | null;
   upload_status: string;
   format?: string | null;
+  content_rating?: string | null;
   source_id?: string | null;
   series_staff?: SeriesStaff[];
   genres?: SeriesGenre[];
