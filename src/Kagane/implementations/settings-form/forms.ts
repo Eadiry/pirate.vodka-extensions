@@ -38,6 +38,12 @@ import {
   setSourceDisplayMode,
 } from "./main";
 
+const GENRE_SELECT_OPTIONS = GENRE_OPTIONS.map((genre) => ({
+  id: encodeFormOptionId(genre),
+  title: genre,
+}));
+const GENRE_BY_SELECT_ID = new Map(GENRE_SELECT_OPTIONS.map((option) => [option.id, option.title]));
+
 export class KaganeSettingsForm extends Form {
   override getSections(): FormSectionElement<unknown>[] {
     return [
@@ -101,10 +107,10 @@ export class KaganeSettingsForm extends Form {
   excludedGenresRow(): FormItemElement<unknown> {
     const props: SelectRowProps = {
       title: "Excluded Genres",
-      options: GENRE_OPTIONS.map((genre) => ({ id: genre, title: genre })),
-      value: getExcludedGenres(),
+      options: GENRE_SELECT_OPTIONS,
+      value: getExcludedGenres().map(encodeFormOptionId),
       minItemCount: 0,
-      maxItemCount: GENRE_OPTIONS.length,
+      maxItemCount: GENRE_SELECT_OPTIONS.length,
       onValueChange: Application.Selector(this as KaganeSettingsForm, "handleExcludedGenres"),
     };
 
@@ -173,7 +179,11 @@ export class KaganeSettingsForm extends Form {
   }
 
   async handleExcludedGenres(value: string[]): Promise<void> {
-    setExcludedGenres(value);
+    setExcludedGenres(
+      value
+        .map((id) => GENRE_BY_SELECT_ID.get(id))
+        .filter((genre): genre is string => genre !== undefined),
+    );
     Application.invalidateDiscoverSections();
     this.reloadForm();
   }
@@ -197,4 +207,10 @@ export class KaganeSettingsForm extends Form {
     setDataSaver(value);
     this.reloadForm();
   }
+}
+
+function encodeFormOptionId(value: string): string {
+  return encodeURIComponent(value).replace(/[!'*~]/g, (char) => {
+    return `%${char.charCodeAt(0).toString(16).toUpperCase()}`;
+  });
 }
