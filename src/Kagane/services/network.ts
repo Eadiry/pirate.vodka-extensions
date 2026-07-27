@@ -39,12 +39,12 @@ export class KaganeInterceptor extends PaperbackInterceptor {
     response: Response,
     data: ArrayBuffer,
   ): Promise<ArrayBuffer> {
-    if (await isCloudflareChallenge(request, response, data)) {
+    const cfMitigated = response.headers?.["cf-mitigated"];
+    if (cfMitigated === "challenge") {
       throw new CloudflareError({
         url: `${BASE_URL}/`,
-        method: "GET",
+        method: request.method ?? "GET",
         headers: {
-          ...request.headers,
           "user-agent": await Application.getDefaultUserAgent(),
         },
       });
@@ -62,39 +62,6 @@ export class KaganeInterceptor extends PaperbackInterceptor {
     const [, retryData] = await Application.scheduleRequest(retryRequest);
     return retryData;
   }
-}
-
-async function isCloudflareChallenge(
-  request: Request,
-  response: Response,
-  data: ArrayBuffer,
-): Promise<boolean> {
-  if (!request.url.startsWith(BASE_URL)) {
-    return false;
-  }
-  if (response.headers?.["cf-mitigated"] === "challenge") {
-    return true;
-  }
-  if (response.status !== 403) {
-    return false;
-  }
-
-  const headerKeys = Object.keys(response.headers ?? {}).map((key) => key.toLowerCase());
-  if (headerKeys.some((key) => key.startsWith("cf-") || key === "server")) {
-    const serverHeaderKey = Object.keys(response.headers ?? {}).find(
-      (key) => key.toLowerCase() === "server",
-    );
-    const server = serverHeaderKey ? response.headers[serverHeaderKey] : "";
-    if (!server || server.toLowerCase().includes("cloudflare")) {
-      return true;
-    }
-  }
-
-  const text = Application.arrayBufferToUTF8String(data);
-  return (
-    typeof text === "string" &&
-    /cloudflare|cf-browser-verification|cf-challenge|Just a moment/i.test(text)
-  );
 }
 
 function shouldRetryPageRequest(request: Request, response: Response, data: ArrayBuffer): boolean {
