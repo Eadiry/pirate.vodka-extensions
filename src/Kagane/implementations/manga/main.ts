@@ -4,9 +4,10 @@
 import type { Request, SourceManga } from "@paperback/types";
 import { URL } from "@paperback/types";
 
-import { apiHeaders, fetchJSON, getKaganeMetadata } from "../../services/network";
+import { fetchJSON } from "../../services/network";
 import { getShowEdition, getShowSource } from "../settings-form/main";
 import { API_URL, type DetailsDto, type KaganeMetadata } from "../shared/models";
+import { getKaganeMetadata } from "../shared/utils";
 import { parseMangaDetails } from "./parsers";
 
 export class MangaProvider {
@@ -19,7 +20,6 @@ export class MangaProvider {
         .addPathComponent(mangaId)
         .toString(),
       method: "GET",
-      headers: apiHeaders(),
     };
 
     const [data, metadata] = await Promise.all([fetchJSON<DetailsDto>(request), safeMetadata()]);

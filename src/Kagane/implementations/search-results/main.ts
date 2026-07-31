@@ -15,7 +15,7 @@ import {
   type SearchFilterValue,
 } from "@paperback/types/lib/compat/0.8";
 
-import { apiHeaders, fetchJSON, getKaganeMetadata } from "../../services/network";
+import { fetchJSON } from "../../services/network";
 import {
   getContentLanguages,
   getContentRatingSetting,
@@ -31,7 +31,12 @@ import {
   type KaganeSearchBook,
   type SearchDto,
 } from "../shared/models";
-import { buildImageUrl, getContentRatingValues, getPaperbackContentRating } from "../shared/utils";
+import {
+  buildImageUrl,
+  getContentRatingValues,
+  getKaganeMetadata,
+  getPaperbackContentRating,
+} from "../shared/utils";
 import {
   buildSearchFilters,
   findIdsByName,
@@ -78,7 +83,7 @@ export class SearchProvider {
     const request: Request = {
       url: url.toString(),
       method: "POST",
-      headers: apiHeaders(),
+      headers: { "content-type": "application/json" },
       body: JSON.stringify(searchBody),
     };
 

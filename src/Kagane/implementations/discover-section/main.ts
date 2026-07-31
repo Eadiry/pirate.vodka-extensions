@@ -4,9 +4,10 @@
 import type { DiscoverSection, DiscoverSectionItem, PagedResults, Request } from "@paperback/types";
 import { DiscoverSectionType, URL } from "@paperback/types";
 
-import { apiHeaders, fetchJSON, getKaganeMetadata } from "../../services/network";
+import { fetchJSON } from "../../services/network";
 import { getShowSource } from "../settings-form/main";
 import { API_URL, PAGE_SIZE, type SearchDto } from "../shared/models";
+import { getKaganeMetadata } from "../shared/utils";
 import { buildSearchBody } from "../search-results/main";
 import { mapDiscoverItem } from "./parsers";
 
@@ -50,7 +51,7 @@ export class DiscoverProvider {
     const request: Request = {
       url,
       method: "POST",
-      headers: apiHeaders(),
+      headers: { "content-type": "application/json" },
       body: JSON.stringify(body),
     };
     const data = await fetchJSON<SearchDto>(request);

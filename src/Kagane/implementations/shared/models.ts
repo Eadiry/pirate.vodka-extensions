@@ -5,12 +5,8 @@ import type { SortingOption } from "@paperback/types";
 
 export const BASE_URL = "https://kagane.to";
 export const API_URL = BASE_URL;
-export const DEFAULT_CACHE_URL = "https://akari.kagane.to";
 export const PAGE_SIZE = 35;
 
-export const METADATA_CACHE_KEY = "kagane-metadata-cache";
-export const METADATA_CACHE_DATE_KEY = "kagane-metadata-cache-date";
-export const METADATA_CACHE_TTL_SECONDS = 24 * 60 * 60;
 export const INTEGRITY_TOKEN_KEY = "kagane-integrity-token";
 export const INTEGRITY_EXP_KEY = "kagane-integrity-exp";
 
