@@ -1,0 +1,56 @@
+{
+  "buildTime": "2026-09-05T13:05:25.010Z",
+  "builtWith": {
+    "toolchain": "1.0.0-alpha.92",
+    "types": "1.0.0-alpha.92"
+  },
+  "repository": {
+    "name": "pirate.vodka-extensions",
+    "description": "Paperback extensions from pirate.vodka. Maintained by Lucifers Circle."
+  },
+  "sources": [
+    {
+      "name": "Kagane",
+      "description": "Extension that pulls content from kagane.to.",
+      "version": "0.0.1-alpha.4",
+      "icon": "icon.png",
+      "language": "en",
+      "contentRating": "SAFE",
+      "capabilities": [
+        1,
+        16,
+        4,
+        64,
+        32
+      ],
+      "badges": [],
+      "developers": [
+        {
+          "name": "Lucifers Circle"
+        }
+      ],
+      "id": "Kagane"
+    },
+    {
+      "name": "VortexScans",
+      "description": "Extension that pulls content from vortexscans.org.",
+      "version": "0.0.1-alpha.3",
+      "icon": "icon.png",
+      "language": "en",
+      "contentRating": "SAFE",
+      "capabilities": [
+        16,
+        4,
+        1,
+        64
+      ],
+      "badges": [],
+      "developers": [
+        {
+          "name": "Lucifers Circle"
+        }
+      ],
+      "id": "VortexScans"
+    }
+  ]
+}
