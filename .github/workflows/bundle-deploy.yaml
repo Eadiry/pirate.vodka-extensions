@@ -35,10 +35,11 @@ jobs:
         run: npm run bundle
       - name: Preserve dev directory from gh-pages
         run: |
-          git fetch origin gh-pages
-          if git ls-tree -d origin/gh-pages dev &>/dev/null; then
-            git checkout origin/gh-pages -- dev
-            mv dev bundles/dev
+          if git fetch origin gh-pages; then
+            if git ls-tree -d origin/gh-pages dev &>/dev/null; then
+              git checkout origin/gh-pages -- dev
+              mv dev bundles/dev
+            fi
           fi
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4
